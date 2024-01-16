@@ -16,7 +16,7 @@ import 'package:residency_desktop/features/dashboard/views/attendance.dart';
 import 'package:residency_desktop/features/home/views/home_page.dart';
 import 'package:residency_desktop/features/keyFlow/views/key_flow_page.dart';
 import 'package:residency_desktop/features/settings/views/settings_page.dart';
-import 'package:residency_desktop/features/students/views/components/admin_students_list.dart';
+import 'package:residency_desktop/features/students/views/components/students_list.dart';
 import 'package:residency_desktop/features/students/views/components/edit_student.dart';
 import 'package:residency_desktop/features/students/views/components/new_student.dart';
 import '../../core/widgets/custom_button.dart';
@@ -234,6 +234,16 @@ final router = GoRouter(
                           ),
                         );
                       }),
+                       GoRoute(
+                      path: RouterInfo.allocationRoute.path,
+                      name: RouterInfo.allocationRoute.routeName,
+                      pageBuilder: (context, state) {
+                        return NoTransitionPage(
+                          child: HomePage(
+                            key: state.pageKey,
+                          ),
+                        );
+                      }),
                   //new complaint route
                   GoRoute(
                       path: RouterInfo.newComplaintRoute.path,
@@ -265,6 +275,7 @@ final router = GoRouter(
                           ),
                         );
                       }),
+                       
                 ]),
           ]),
     ]);

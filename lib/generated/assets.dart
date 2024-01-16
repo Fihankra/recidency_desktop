@@ -2,6 +2,19 @@
 class Assets {
   Assets._();
 
+  static const String fontsOpenSansBold = 'assets/fonts/OpenSans-Bold.ttf';
+  static const String fontsOpenSansExtraBold = 'assets/fonts/OpenSans-ExtraBold.ttf';
+  static const String fontsOpenSansItalic = 'assets/fonts/OpenSans-Italic.ttf';
+  static const String fontsOpenSansLight = 'assets/fonts/OpenSans-Light.ttf';
+  static const String fontsOpenSansMedium = 'assets/fonts/OpenSans-Medium.ttf';
+  static const String fontsOpenSansRegular = 'assets/fonts/OpenSans-Regular.ttf';
+  static const String fontsOpenSansSemiBold = 'assets/fonts/OpenSans-SemiBold.ttf';
+  static const String fontsRobotoBlack = 'assets/fonts/Roboto-Black.ttf';
+  static const String fontsRobotoBold = 'assets/fonts/Roboto-Bold.ttf';
+  static const String fontsRobotoItalic = 'assets/fonts/Roboto-Italic.ttf';
+  static const String fontsRobotoMedium = 'assets/fonts/Roboto-Medium.ttf';
+  static const String fontsRobotoRegular = 'assets/fonts/Roboto-Regular.ttf';
+  static const String imagesImageP = 'assets/images/image_p.png';
   static const String imagesLogo = 'assets/images/logo.png';
   static const String imagesLogoDark = 'assets/images/logo_dark.png';
 

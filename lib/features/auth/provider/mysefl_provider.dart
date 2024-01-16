@@ -1,22 +1,21 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:residency_desktop/config/router/router_info.dart';
 import 'package:residency_desktop/core/widgets/custom_dialog.dart';
 import 'package:residency_desktop/database/connection.dart';
 import 'package:residency_desktop/features/core/data/user_model.dart';
 import 'package:residency_desktop/features/core/usecase/user_usecase.dart';
-import 'package:residency_desktop/utils/application_utils.dart';
 
 final myselfProvider = StateNotifierProvider<Myself, UserModel>((ref) {
-  var db = ref.watch(dbProvider);
-  return Myself(db!);
+  var dio = ref.watch(serverProvider);
+  return Myself(dio!);
 });
 
 class Myself extends StateNotifier<UserModel> {
-  Myself(this.db) : super(UserModel());
-  final Db db;
+  Myself(this.dio) : super(UserModel());
+  final Dio dio;
 
   void setMyself(UserModel user) {
     state = user;
@@ -46,9 +45,9 @@ class Myself extends StateNotifier<UserModel> {
       {required BuildContext context, required WidgetRef ref}) async {
     CustomDialog.showLoading(message: 'Updating Password...');
     state =
-        state.copyWith(password: () => AppUtils.hashPassword(state.password!));
+        state.copyWith(password: () => state.password!);
     var (exception, user) =
-        await UserUseCase(db: db).updateUser(state.toUpdatePassword());
+        await UserUseCase(dio: dio).updateUser(state.toUpdatePassword());
     if (exception != null) {
       CustomDialog.dismiss();
       CustomDialog.showError(
@@ -78,7 +77,6 @@ class Myself extends StateNotifier<UserModel> {
     state = UserModel();
     CustomDialog.dismiss();
     context.go(RouterInfo.authRoute.path);
-
     CustomDialog.showToast(message: 'Logged out successfully');
   }
 }

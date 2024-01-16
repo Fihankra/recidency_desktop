@@ -67,39 +67,22 @@ class CustomDialog {
               ),
               const Spacer(),
               SizedBox(
-                height: 40,
+                height: 50,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const Expanded(
-                      child: SizedBox(),
-                    ),
-                    const VerticalDivider(
-                      width: 0,
-                    ),
                     Expanded(
-                      child: Column(
-                        children: [
-                          const Divider(
-                            height: 0,
-                          ),
-                          Expanded(
-                            child: TextButton(
-                              style: TextButton.styleFrom(
-                                foregroundColor: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .color,
-                              ),
-                              onPressed: () => SmartDialog.dismiss(),
-                              child: Center(
-                                  child: Text(
-                                'Okey',
-                                style: getTextStyle(),
-                              )),
-                            ),
-                          ),
-                        ],
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor:
+                              Theme.of(context).textTheme.bodyLarge!.color,
+                        ),
+                        onPressed: () => SmartDialog.dismiss(),
+                        child: Center(
+                            child: Text(
+                          'Okey',
+                          style: getTextStyle(fontSize: 14),
+                        )),
                       ),
                     )
                   ],
@@ -158,33 +141,22 @@ class CustomDialog {
               ),
               const Spacer(),
               SizedBox(
-                height: 40,
+                height: 50,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const Expanded(
-                      child: SizedBox(),
-                    ),
-                    const VerticalDivider(
-                      width: 0,
-                    ),
                     Expanded(
-                      child: Column(
-                        children: [
-                          const Divider(
-                            height: 0,
-                          ),
-                          Expanded(
-                            child: TextButton(
-                              style: TextButton.styleFrom(
-                                foregroundColor:
-                                    Theme.of(_).textTheme.bodyLarge!.color,
-                              ),
-                              onPressed: () => SmartDialog.dismiss(),
-                              child: const Center(child: Text('Okey')),
-                            ),
-                          ),
-                        ],
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor:
+                              Theme.of(_).textTheme.bodyLarge!.color,
+                        ),
+                        onPressed: () => SmartDialog.dismiss(),
+                        child: Center(
+                            child: Text(
+                          'Okey',
+                          style: getTextStyle(fontSize: 14),
+                        )),
                       ),
                     )
                   ],
@@ -319,12 +291,14 @@ class CustomDialog {
   }
 
   static Future<void> showCustom(
-      {required Widget ui, SmartDialogController? controller}) async {
+      {required Widget ui,
+      SmartDialogController? controller,
+      double? width}) async {
     SmartDialog.show(
       controller: controller,
       maskColor: Colors.transparent,
       builder: (_) {
-        return SizedBox(width: 900, child: ui);
+        return SizedBox(width: width ?? 900, child: ui);
       },
     );
   }

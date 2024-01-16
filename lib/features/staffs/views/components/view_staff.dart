@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -184,8 +185,8 @@ class _ViewStaffState extends State<ViewStaff> {
                                     size: 100,
                                   ),
                                 )
-                              : Image.file(
-                                  File(widget.staff.image!),
+                              : Image.memory(
+                                  base64Decode(widget.staff.image!),
                                   fit: BoxFit.cover,
                                 )),
                     ],

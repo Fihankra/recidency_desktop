@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/theme/theme.dart';
 
 class CustomTextFields extends ConsumerWidget {
-  const CustomTextFields({
+  const CustomTextFields( {
     super.key,
     this.label,
     this.prefixIcon,
@@ -27,6 +27,8 @@ class CustomTextFields extends ConsumerWidget {
     this.validator,
     this.controller,
     this.isPhoneInput = false,
+    this.onSubmitted,
+    this.focusNode,
   });
 
   final String? label;
@@ -39,6 +41,8 @@ class CustomTextFields extends ConsumerWidget {
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
   final void Function(String?)? onSaved;
+  final void Function(String?)? onSubmitted;
+  final FocusNode? focusNode;
   final void Function()? onTap;
   final int? maxLines;
   final double? radius;
@@ -58,6 +62,8 @@ class CustomTextFields extends ConsumerWidget {
       obscureText: obscureText ?? false,
       onTap: onTap,
       validator: validator,
+      focusNode: focusNode,
+      onFieldSubmitted: onSubmitted,
       inputFormatters: [
         if (isCapitalized!) UpperCaseTextFormatter(),
         if (isDigitOnly ?? false)
@@ -67,7 +73,12 @@ class CustomTextFields extends ConsumerWidget {
       textCapitalization: isCapitalized!
           ? TextCapitalization.characters
           : TextCapitalization.none,
-      style: getTextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+      style: getTextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+          color: isReadOnly!
+              ? Colors.grey
+              : Theme.of(context).textTheme.labelLarge!.color),
       onChanged: onChanged,
       onSaved: onSaved,
       maxLines: maxLines ?? 1,

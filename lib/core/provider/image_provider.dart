@@ -1,5 +1,4 @@
 import 'package:camera/camera.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ImagePicked {
   XFile? image;
@@ -16,19 +15,19 @@ class ImagePicked {
   }
 }
 
-final imageProvider =
-    StateNotifierProvider.autoDispose<ImageProvider, ImagePicked>((ref) => ImageProvider());
+// final updateImageProvider =
+//     StateNotifierProvider.autoDispose<ImageProvider, ImagePicked>((ref) => ImageProvider());
 
-class ImageProvider extends StateNotifier<ImagePicked> {
-  ImageProvider() : super(ImagePicked());
+// class ImageProvider extends StateNotifier<ImagePicked> {
+//   ImageProvider() : super(ImagePicked());
 
-  void setImage({XFile? image, bool isCaptured = false}) {
-    state = state.copyWith(image: image, isCaptured: isCaptured);
-  }
+//   void setImage({XFile? image, bool isCaptured = false}) {
+//     state = state.copyWith(image: image, isCaptured: isCaptured);
+//   }
 
-  void setError(String error) {
-    state = state.copyWith(error: error);
-  }
+//   void setError(String error) {
+//     state = state.copyWith(error: error);
+//   }
 
 
-}
+// }

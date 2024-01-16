@@ -37,7 +37,7 @@ class StudentModel {
     this.room,
     this.department,
     this.image,
-    this.role = 'student',
+    this.role = 'Student',
     this.password,
     this.level,
     this.isDeleted = false,
@@ -231,9 +231,13 @@ class StudentModel {
     String femaleImage = 'https://xsgames.co/randomusers/avatar.php?g=female';
     var blk = ['Block A', 'Block B', 'Block C', 'Block D', 'Annex'];
     for (var block in blk) {
+      print(
+          '$block=================================================================');
       var lastChar = block.trim().substring(block.length - 1);
       for (int i = 0; i < 20; i++) {
-        for (int x = 0; x <4; x++) {
+        print("\t Room ${i + 1}");
+        for (int x = 0; x < 4; x++) {
+          print("\t\t Student ${x + 1}");
           var room = lastChar != 'x'
               ? '${lastChar.toUpperCase()}${i + 1}'
               : 'AA${i + 1}';
@@ -242,12 +246,12 @@ class StudentModel {
             Uri.parse(gender == 'Male' ? maleImage : femaleImage),
           );
           String id = faker.guid.guid().hashCode.toString();
-          var folder = await AppUtils.createFolderInAppDocDir('students');
-          var filename = id.replaceAll(' ', '_');
-          var path = '$folder/$filename.jpg';
-          try {
-            File(path).writeAsBytesSync(r.bodyBytes);
-          } catch (_) {}
+          var file = await File('image$i.jpg').writeAsBytes(r.bodyBytes);
+          var (status, data) = await AppUtils.endCodeimage(image: file);
+          String? path;
+          if (status) {
+            path = data;
+          }
           list.add(StudentModel(
               id: id,
               firstname: faker.person.firstName(),
@@ -257,16 +261,34 @@ class StudentModel {
                   .element(['100', '200', '300', '400', 'Graduate']),
               department: faker.randomGenerator.element(departments),
               room: room,
-              phone: faker.phoneNumber.us(),
-              password: AppUtils.hashPassword(id),
+              phone: faker.phoneNumber
+                          .us()
+                          .replaceAll('-', '')
+                          .replaceAll('.', '')
+                          .length >
+                      10
+                  ? faker.phoneNumber
+                      .us()
+                      .replaceAll('-', '')
+                      .replaceAll('.', '')
+                      .substring(0, 10)
+                  : faker.phoneNumber
+                      .us()
+                      .replaceAll('-', '')
+                      .replaceAll('.', ''),
+              password: id,
               image: path,
               gender: gender,
-              academicYear: faker.randomGenerator.element(['2023/2024']),
+              academicYear: faker.randomGenerator.element(['2024/2025']),
               createdAt: faker.date
                   .dateTime(minYear: 2023, maxYear: 2023)
                   .millisecondsSinceEpoch));
+          if (File('image$i.jpg').existsSync()) {
+            File('image$i.jpg').deleteSync();
+          }
         }
       }
+      print('done--------------------------------------------');
     }
 
     return Future.value(list);

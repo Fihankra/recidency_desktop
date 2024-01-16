@@ -36,6 +36,9 @@ dependencies:
   syncfusion_flutter_pdf: ^21.2.4
   faker: ^2.1.0
   http: ^1.1.2
+  image_compression_flutter: ^1.0.3
+  autocomplete_textfield: ^2.0.1
+  dio: ^5.4.0
 
 
 

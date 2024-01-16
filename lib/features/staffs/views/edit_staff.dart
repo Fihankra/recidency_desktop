@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:residency_desktop/config/router/router_info.dart';
 import 'package:residency_desktop/config/theme/theme.dart';
 import 'package:residency_desktop/core/constants/email_regex.dart';
-import 'package:residency_desktop/core/provider/image_provider.dart';
+import 'package:residency_desktop/core/constants/role_enum.dart';
 import 'package:residency_desktop/core/widgets/components/page_headers.dart';
 import 'package:residency_desktop/core/widgets/custom_button.dart';
 import 'package:residency_desktop/core/widgets/custom_drop_down.dart';
@@ -249,11 +250,11 @@ class _EditStaffPageState extends ConsumerState<EditStaffPage> {
                             items: const [
                               //male and female
                               DropdownMenuItem(
-                                value: 'Hall Admin',
+                                value: Role.hallAdmin,
                                 child: Text('Hall Admin'),
                               ),
                               DropdownMenuItem(
-                                value: 'Hall Assistant',
+                                value: Role.hallAssistant,
                                 child: Text('Hall Assistant'),
                               ),
                             ],
@@ -283,6 +284,8 @@ class _EditStaffPageState extends ConsumerState<EditStaffPage> {
                           CustomTextFields(
                             label: 'Phone Number',
                             hintText: 'Enter Phone Number',
+                            
+                            max: 10,
                             onSaved: (value) {
                               staffNotifier.setPhone(value!);
                             },
@@ -377,9 +380,9 @@ class _EditStaffPageState extends ConsumerState<EditStaffPage> {
               width: 200,
               decoration: BoxDecoration(
                   border: Border.all(), borderRadius: BorderRadius.circular(5)),
-              child: ref.watch(imageProvider).image != null
+              child: ref.watch(staffImageProvider).image != null
                   ? Image.file(
-                      File(ref.watch(imageProvider).image!.path),
+                      File(ref.watch(staffImageProvider).image!.path),
                       fit: BoxFit.cover,
                     )
                   : controller != null &&
@@ -387,8 +390,8 @@ class _EditStaffPageState extends ConsumerState<EditStaffPage> {
                           isCameraOn
                       ? CameraPreview(controller!)
                       : assistant.image != null && assistant.image!.isNotEmpty
-                          ? Image.file(
-                              File(assistant.image!),
+                          ? Image.memory(
+                              base64Decode(assistant.image!),
                               fit: BoxFit.cover,
                             )
                           : const Center(
@@ -398,17 +401,11 @@ class _EditStaffPageState extends ConsumerState<EditStaffPage> {
                               ),
                             ),
             ),
-            Text(
-              ref.watch(imageProvider).error ?? '',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: getTextStyle(fontSize: 12, color: Colors.red),
-            ),
+            
             const SizedBox(
               height: 15,
             ),
-            if (ref.watch(imageProvider).image != null)
+            if (ref.watch(staffImageProvider).image != null)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -477,7 +474,7 @@ class _EditStaffPageState extends ConsumerState<EditStaffPage> {
                       )),
                 ],
               )
-            else if (ref.watch(imageProvider).image == null && !isCameraOn)
+            else if (ref.watch(staffImageProvider).image == null && !isCameraOn)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -568,7 +565,7 @@ class _EditStaffPageState extends ConsumerState<EditStaffPage> {
     if (controller != null) {
       await controller!.dispose();
     }
-    ref.invalidate(imageProvider);
+    ref.invalidate(staffImageProvider);
     setState(() {
       controller = null;
 
@@ -585,8 +582,8 @@ class _EditStaffPageState extends ConsumerState<EditStaffPage> {
         preferredCameraDevice: CameraDevice.rear);
     if (image != null) {
       ref
-          .read(imageProvider.notifier)
-          .setImage(image: image, isCaptured: false);
+          .read(staffImageProvider.notifier)
+          .setImage(image: image,isCaptured: false);
     }
   }
 
@@ -604,6 +601,8 @@ class _EditStaffPageState extends ConsumerState<EditStaffPage> {
     setState(() {
       controller = null;
     });
-    ref.read(imageProvider.notifier).setImage(image: path, isCaptured: true);
+   ref
+        .read(staffImageProvider.notifier)
+        .setImage(image: path, isCaptured: true);
   }
 }

@@ -9,7 +9,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:residency_desktop/config/router/router_info.dart';
 import 'package:residency_desktop/config/theme/theme.dart';
 import 'package:residency_desktop/core/constants/email_regex.dart';
-import 'package:residency_desktop/core/provider/image_provider.dart';
+import 'package:residency_desktop/core/constants/role_enum.dart';
 import 'package:residency_desktop/core/widgets/components/page_headers.dart';
 import 'package:residency_desktop/core/widgets/custom_button.dart';
 import 'package:residency_desktop/core/widgets/custom_dialog.dart';
@@ -139,9 +139,9 @@ class _NewAssistantPageState extends ConsumerState<NewStaffPage> {
               width: 200,
               decoration: BoxDecoration(
                   border: Border.all(), borderRadius: BorderRadius.circular(5)),
-              child: ref.watch(imageProvider).image != null
+              child: ref.watch(staffImageProvider).image != null
                   ? Image.file(
-                      File(ref.watch(imageProvider).image!.path),
+                      File(ref.watch(staffImageProvider).image!.path),
                       fit: BoxFit.cover,
                     )
                   : controller != null &&
@@ -155,17 +155,10 @@ class _NewAssistantPageState extends ConsumerState<NewStaffPage> {
                           ),
                         ),
             ),
-            Text(
-              ref.watch(imageProvider).error ?? '',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: getTextStyle(fontSize: 12, color: Colors.red),
-            ),
             const SizedBox(
               height: 15,
             ),
-            if (ref.watch(imageProvider).image != null)
+            if (ref.watch(staffImageProvider).image != null)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -234,7 +227,7 @@ class _NewAssistantPageState extends ConsumerState<NewStaffPage> {
                       )),
                 ],
               )
-            else if (ref.watch(imageProvider).image == null && !isCameraOn)
+            else if (ref.watch(staffImageProvider).image == null && !isCameraOn)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -429,11 +422,11 @@ class _NewAssistantPageState extends ConsumerState<NewStaffPage> {
                           items: const [
                             //male and female
                             DropdownMenuItem(
-                              value: 'Hall Admin',
+                              value: Role.hallAdmin,
                               child: Text('Hall Admin'),
                             ),
                             DropdownMenuItem(
-                              value: 'Hall Assistant',
+                              value: Role.hallAssistant,
                               child: Text('Hall Assistant'),
                             ),
                           ],
@@ -466,6 +459,8 @@ class _NewAssistantPageState extends ConsumerState<NewStaffPage> {
                           hintText: 'Enter Phone Number',
                           prefixIcon: Icons.phone,
                           isDigitOnly: true,
+                         
+                          max: 10,
                           onSaved: (phone) {
                             ref
                                 .read(newStaffProvider.notifier)
@@ -488,11 +483,6 @@ class _NewAssistantPageState extends ConsumerState<NewStaffPage> {
                           icon: MdiIcons.creation,
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              // if (ref.watch(imageProvider).image == null) {
-                              //   ref.read(imageProvider.notifier).setError(
-                              //       'Please select assistant picture');
-                              //   return;
-                              // }
                               //save form
                               _formKey.currentState!.save();
                               ref.read(newStaffProvider.notifier).createStaff(
@@ -557,7 +547,7 @@ class _NewAssistantPageState extends ConsumerState<NewStaffPage> {
     }
     setState(() {
       controller = null;
-      ref.invalidate(imageProvider);
+      ref.invalidate(staffImageProvider);
       isCameraOn = false;
     });
   }
@@ -573,8 +563,8 @@ class _NewAssistantPageState extends ConsumerState<NewStaffPage> {
       setState(() {
         isCameraOn = false;
       });
-      ref
-          .read(imageProvider.notifier)
+     ref
+          .read(staffImageProvider.notifier)
           .setImage(image: image, isCaptured: false);
     }
   }
@@ -593,6 +583,8 @@ class _NewAssistantPageState extends ConsumerState<NewStaffPage> {
     setState(() {
       controller = null;
     });
-    ref.read(imageProvider.notifier).setImage(image: path, isCaptured: true);
+    ref
+        .read(staffImageProvider.notifier)
+        .setImage(image: path, isCaptured: true);
   }
 }

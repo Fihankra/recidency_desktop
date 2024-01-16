@@ -19,10 +19,10 @@ class RouterInfo {
       RouterInfo(path: "/settings", routeName: "SettingsRout");
   static RouterInfo keyLogsRoute =
       RouterInfo(path: "/key-logs", routeName: "KeyLogsRout");
-  static RouterInfo messagesRoute = RouterInfo(
-      path: "/messages", routeName: "MessagesRout");
-  static RouterInfo newMessageRoute = RouterInfo(
-      path: "/messages/new", routeName: "NewMessageRout");
+  static RouterInfo messagesRoute =
+      RouterInfo(path: "/messages", routeName: "MessagesRout");
+  static RouterInfo newMessageRoute =
+      RouterInfo(path: "/messages/new", routeName: "NewMessageRout");
 
   static RouterInfo newAssistantRoute =
       RouterInfo(path: "/assistants/new", routeName: "NewAssistantRout");
@@ -38,7 +38,15 @@ class RouterInfo {
   // assistant routes
   static RouterInfo homeRoute =
       RouterInfo(routeName: 'HomeRoute', path: '/home');
-      //new complaint route
+
+  static RouterInfo allocationRoute =
+      RouterInfo(routeName: 'AllocationRoute', path: '/allocation');
+
+  //new complaint route
   static RouterInfo newComplaintRoute =
-      RouterInfo(routeName: 'NewComplaintRoute', path: '/new-complaint'); 
+      RouterInfo(routeName: 'NewComplaintRoute', path: '/new-complaint');
+
+  static RouterInfo viewSelectedStudentsRoute = RouterInfo(
+      routeName: 'ViewSelectedStudentsRoute', path: '/view-selected-students'
+  );
 }

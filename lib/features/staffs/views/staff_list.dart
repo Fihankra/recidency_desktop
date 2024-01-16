@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -27,7 +27,12 @@ class _StaffListPageState extends ConsumerState<StaffListPage> {
   @override
   @override
   Widget build(BuildContext context) {
-    var staffFuture = ref.watch(staffFutureProvider);
+     var staffData = ref.watch(staffProvider);
+          var staffNotifier = ref.watch(staffProvider.notifier);
+          var tableTextStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
+              fontFamily: 'openSans',
+              fontSize: 14,
+              fontWeight: FontWeight.w500);
     return Container(
       padding: const EdgeInsets.all(15),
       child: Column(children: [
@@ -39,45 +44,6 @@ class _StaffListPageState extends ConsumerState<StaffListPage> {
           hasExtraButton: true,
           hasSecondExtraButton: false,
           secondExtraButtonText: 'Import From Year',
-          onSecondExtraButtonPressed: () async {
-            //pop up manu of all academic years
-            //position to page end
-            var box = context.findRenderObject() as RenderBox;
-            var position = RelativeRect.fromSize(
-                box.localToGlobal(const Offset(100, 50)) & box.size,
-                const Size(0, 0));
-
-            await showMenu<String>(
-              context: context,
-              elevation: 10,
-              position: position,
-              items: [
-                '2021/2022',
-                '2022/2023',
-                '2023/2024',
-                '2024/2025',
-                '2025/2026',
-                '2026/2027',
-                '2027/2028',
-                '2028/2029',
-                '2029/2030'
-              ]
-                  .map((e) => PopupMenuItem<String>(
-                        value: e,
-                        child: Text(e),
-                      ))
-                  .toList(),
-            ).then((value) async {
-              if (value != null) {
-                var message = await importAssistant(ref: ref, year: value);
-                if (message.contains("successfully")) {
-                  CustomDialog.showSuccess(message: message);
-                } else {
-                  CustomDialog.showError(message: message);
-                }
-              }
-            });
-          },
           onExtraButtonPressed: () {
             context.go(RouterInfo.newAssistantRoute.path);
           },
@@ -85,24 +51,18 @@ class _StaffListPageState extends ConsumerState<StaffListPage> {
         const SizedBox(
           height: 10,
         ),
-        staffFuture.when(data: (data) {
-          data.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
-          var staffData = ref.watch(staffProvider(data));
-          var staffNotifier = ref.watch(staffProvider(data).notifier);
-          var tableTextStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
-              fontFamily: 'openSans',
-              fontSize: 14,
-              fontWeight: FontWeight.w500);
-          return Expanded(
+    
+         
+        Expanded(
             child: Column(
               children: [
                 Expanded(
                   child: CustomTable<StaffModel>(
                     currentIndex: staffData.currentPageItems.isNotEmpty
-                        ? data.indexOf(staffData.currentPageItems[0]) + 1
+                        ? staffData.items.indexOf(staffData.currentPageItems[0]) + 1
                         : 0,
                     lastIndex: staffData.pageSize *
-                        (ref.watch(staffProvider(data)).currentPage + 1),
+                        (ref.watch(staffProvider).currentPage + 1),
                     pageSize: staffData.pageSize,
                     onPageSizeChanged: (value) {
                       staffNotifier.onPageSizeChange(value!);
@@ -137,8 +97,9 @@ class _StaffListPageState extends ConsumerState<StaffListPage> {
                         cellBuilder: (assistant) {
                           return CircleAvatar(
                             radius: 20,
+                            backgroundColor: Colors.grey[200],
                             backgroundImage: assistant.image != null
-                                ? FileImage(File(assistant.image!))
+                                ? MemoryImage(base64Decode(assistant.image!))
                                 : null,
                           );
                         },
@@ -422,15 +383,8 @@ class _StaffListPageState extends ConsumerState<StaffListPage> {
                 ),
               ],
             ),
-          );
-        }, error: (error, stack) {
-          return const Expanded(
-            child: Center(child: Text('Error')),
-          );
-        }, loading: () {
-          return const Expanded(
-              child: Center(child: CircularProgressIndicator()));
-        }),
+          )
+        
       ]),
     );
   }

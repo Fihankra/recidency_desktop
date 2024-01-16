@@ -7,6 +7,8 @@ import 'package:residency_desktop/core/widgets/components/side_bar.dart';
 import 'package:residency_desktop/features/container/action_controls.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'provider/main_provider.dart';
+
 class HomeContainer extends ConsumerStatefulWidget {
   const HomeContainer({required this.child, this.shellContext, super.key});
   final StatefulNavigationShell child;
@@ -19,6 +21,7 @@ class HomeContainer extends ConsumerStatefulWidget {
 class _HomeContainerState extends ConsumerState<HomeContainer> {
   @override
   Widget build(BuildContext context) {
+    var data = ref.watch(mainProvider);
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.background,
         body: Row(
@@ -54,9 +57,22 @@ class _HomeContainerState extends ConsumerState<HomeContainer> {
                     ),
                   ),
                   Expanded(
-                    child: FocusTraversalGroup(
-                      key: ValueKey('body${widget.child.key}'),
-                      child: widget.child,
+                    child: data.when(
+                      loading: () =>  Center(child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(),
+                          Text('Loading data from server',style: getTextStyle()),
+                        ],
+                      )),
+                      error: (e, s) => Center(child: Text('Unable to load data from server, Contact admin',style: getTextStyle(),)),
+                      data: (data) {
+                        return FocusTraversalGroup(
+                          key: ValueKey('body${widget.child.key}'),
+                          child: widget.child,
+                        );
+                      }
                     ),
                   ),
                 ],

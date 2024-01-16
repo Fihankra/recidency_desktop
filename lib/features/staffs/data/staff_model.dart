@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:faker/faker.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:residency_desktop/core/constants/role_enum.dart';
 import 'package:residency_desktop/core/functions/date_time.dart';
 import 'package:residency_desktop/features/core/data/user_model.dart';
 import 'package:residency_desktop/utils/application_utils.dart';
@@ -94,7 +95,6 @@ class StaffModel {
       question2: () => user.question2,
       answer2: () => user.answer2,
       isDeleted: user.isDeleted,
-      // academicYear: () => user.academicYear,
       createdAt: () => user.createdAt,
     );
   }
@@ -153,7 +153,6 @@ class StaffModel {
       'ROLE',
       'EMAIL',
       'PHONE',
-      //'ACADEMIC YEAR',
       'CREATED AT'
     ];
   }
@@ -167,7 +166,6 @@ class StaffModel {
       item.role ?? '',
       item.email ?? '',
       item.phone ?? '',
-      // item.academicYear ?? '',
       item.createdAt != null ? DateTimeAction.getDateTime(item.createdAt!) : '',
     ];
   }
@@ -175,33 +173,36 @@ class StaffModel {
   static Future<List<StaffModel>> dummyDtata() async {
     var faker = Faker();
     var list = <StaffModel>[];
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 30; i++) {
       String id = faker.guid.guid().hashCode.toString();
       String image = faker.image.image();
       final http.Response r = await http.get(
         Uri.parse(image),
       );
-      var folder = await AppUtils.createFolderInAppDocDir('assistants');
-      var filename = id.replaceAll(' ', '_');
-      var path = '$folder/$filename.jpg';
-      try {
-        File(path).writeAsBytesSync(r.bodyBytes);
-      } catch (_) {}
+      var file =await  File('image$i.jpg').writeAsBytes(r.bodyBytes);
+      var (status, data) = await AppUtils.endCodeimage(image: file);
+      String ?path;
+      if (status) {
+        path = data;
+      }
       list.add(StaffModel(
           id: id,
           firstname: faker.person.firstName(),
           surname: faker.person.lastName(),
           email: faker.internet.email(),
           phone: faker.phoneNumber.us(),
-          password: AppUtils.hashPassword(id),
+          password: id,
           image: path,
           gender: faker.randomGenerator.element(['Male', 'Female']),
-          // academicYear: faker.randomGenerator
-          //     .element(['2021/2022', '2022/2023', '2023/2024', '2024/2025']),
+          role: Role.hallAssistant,
           createdAt: faker.date
               .dateTime(minYear: 2023, maxYear: 2023)
               .millisecondsSinceEpoch));
+              if(File('image$i.jpg').existsSync()){
+                File('image$i.jpg').deleteSync();
+              }
     }
+   
 
     return Future.value(list);
   }

@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -26,6 +25,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     var settings = ref.watch(settingsFutureProvider);
+
     return Container(
       padding: const EdgeInsets.all(15),
       child: Column(children: [
@@ -88,9 +88,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       width: 600,
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: theme == darkMode
-                              ? Colors.white
-                              : Colors.black,
+                          color:
+                              theme == darkMode ? Colors.white : Colors.black,
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(
@@ -210,9 +209,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                     ? Colors.white
                                     : Colors.black,
                               ),
-                              image: data.hallLogo != null
+                              image: ref.watch(hallLogoProvider) != null
                                   ? DecorationImage(
-                                      image: FileImage(File(data.hallLogo!)),
+                                      image: FileImage(
+                                        ref.watch(hallLogoProvider)!,
+                                      ),
+                                      fit: BoxFit.cover)
+                                  :
+                              data.hallLogo != null
+                                  ? DecorationImage(
+                                      image: MemoryImage(
+                                          base64Decode(data.hallLogo!)),
                                       fit: BoxFit.cover)
                                   : null),
                           child: data.hallLogo != null
@@ -227,7 +234,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         //upload button
                         TextButton.icon(
                             onPressed: () {
-                              ref.read(settingsProvider.notifier).pickImage();
+                              ref.read(hallLogoProvider.notifier).pickImage();
                             },
                             icon: Icon(MdiIcons.upload),
                             label: const Text('Upload Logo'))
@@ -252,7 +259,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
                           ref.read(settingsProvider.notifier).saveSettings(
-                              context: context, ref: ref,);
+                                context: context,
+                                ref: ref,
+                              );
                         }
                       }),
                 )

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:residency_desktop/core/widgets/components/page_headers.dart';
 import 'package:residency_desktop/core/widgets/custom_button.dart';
 import 'package:residency_desktop/core/widgets/custom_drop_down.dart';
 import 'package:residency_desktop/core/widgets/custom_input.dart';
+import 'package:residency_desktop/core/widgets/responsive_ui.dart';
 import 'package:residency_desktop/features/students/data/students_model.dart';
 import 'package:residency_desktop/features/students/provider/student_provider.dart';
 
@@ -33,7 +35,6 @@ class _EditStudentState extends ConsumerState<EditStudent> {
   final _phoneNumberController = TextEditingController();
   final idController = TextEditingController();
   final roomController = TextEditingController();
-
 
   List<CameraDescription> cameras = [];
   CameraDescription? selectedCamera;
@@ -109,7 +110,7 @@ class _EditStudentState extends ConsumerState<EditStudent> {
     }
     setState(() {
       controller = null;
-      ref.invalidate(imageProvider);
+      ref.invalidate(studentImageProvider);
       isCameraOn = false;
     });
   }
@@ -126,7 +127,7 @@ class _EditStudentState extends ConsumerState<EditStudent> {
         isCameraOn = false;
       });
       ref
-          .read(imageProvider.notifier)
+          .read(studentImageProvider.notifier)
           .setImage(image: image, isCaptured: false);
     }
   }
@@ -145,8 +146,11 @@ class _EditStudentState extends ConsumerState<EditStudent> {
     setState(() {
       controller = null;
     });
-    ref.read(imageProvider.notifier).setImage(image: path, isCaptured: true);
+    ref
+        .read(studentImageProvider.notifier)
+        .setImage(image: path, isCaptured: true);
   }
+
   @override
   Widget build(BuildContext context) {
     var student = ref.watch(selectedStudentProvider);
@@ -187,11 +191,14 @@ class _EditStudentState extends ConsumerState<EditStudent> {
   }
 
   Widget _buildDesktop(StudentModel student) {
+    var size = MediaQuery.of(context).size;
     return Card(
       color: Theme.of(context).colorScheme.surface,
       elevation: 5,
       child: Container(
-          width: 700,
+          width: ResponsiveScreen.isDesktop(context)
+              ? size.width * 0.6
+              : size.width * .8,
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -349,6 +356,8 @@ class _EditStudentState extends ConsumerState<EditStudent> {
                                 label: 'Phone Number',
                                 hintText: 'Enter Phone Number',
                                 controller: _phoneNumberController,
+                                isDigitOnly: true,
+                                max: 10,
                                 prefixIcon: Icons.phone,
                                 onSaved: (phone) {
                                   ref
@@ -477,7 +486,6 @@ class _EditStudentState extends ConsumerState<EditStudent> {
                                     context: context,
                                     ref: ref,
                                   );
-                                 
                             }
                           },
                         )
@@ -543,9 +551,9 @@ class _EditStudentState extends ConsumerState<EditStudent> {
               width: 200,
               decoration: BoxDecoration(
                   border: Border.all(), borderRadius: BorderRadius.circular(5)),
-              child: ref.watch(imageProvider).image != null
+              child: ref.watch(studentImageProvider).image != null
                   ? Image.file(
-                      File(ref.watch(imageProvider).image!.path),
+                      File(ref.watch(studentImageProvider).image!.path),
                       fit: BoxFit.cover,
                     )
                   : controller != null &&
@@ -553,8 +561,8 @@ class _EditStudentState extends ConsumerState<EditStudent> {
                           isCameraOn
                       ? CameraPreview(controller!)
                       : student.image != null && student.image!.isNotEmpty
-                          ? Image.file(
-                              File(student.image!),
+                          ? Image.memory(
+                              base64Decode(student.image!),
                               fit: BoxFit.cover,
                             )
                           : const Center(
@@ -564,17 +572,10 @@ class _EditStudentState extends ConsumerState<EditStudent> {
                               ),
                             ),
             ),
-            Text(
-              ref.watch(imageProvider).error ?? '',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: getTextStyle(fontSize: 12, color: Colors.red),
-            ),
             const SizedBox(
               height: 15,
             ),
-            if (ref.watch(imageProvider).image != null)
+            if (ref.watch(studentImageProvider).image != null)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -643,7 +644,8 @@ class _EditStudentState extends ConsumerState<EditStudent> {
                       )),
                 ],
               )
-            else if (ref.watch(imageProvider).image == null && !isCameraOn)
+            else if (ref.watch(studentImageProvider).image == null &&
+                !isCameraOn)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -692,6 +694,4 @@ class _EditStudentState extends ConsumerState<EditStudent> {
           ],
         ));
   }
-
- 
 }

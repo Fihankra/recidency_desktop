@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -60,6 +61,7 @@ class _ViewStudentState extends ConsumerState<ViewStudent> {
                             hintText: 'Enter student ID',
                             prefixIcon: MdiIcons.idCard,
                             controller: idController,
+                            isReadOnly: true,
                           ),
                         ),
                         const SizedBox(
@@ -133,6 +135,7 @@ class _ViewStudentState extends ConsumerState<ViewStudent> {
                             label: 'Phone Number',
                             controller: _phoneNumberController,
                             hintText: 'Enter Phone Number',
+                            isReadOnly: true,
                             prefixIcon: Icons.phone,
                             isDigitOnly: true,
                           ),
@@ -226,8 +229,8 @@ class _ViewStudentState extends ConsumerState<ViewStudent> {
                             borderRadius: BorderRadius.circular(5)),
                         child: widget.student.image != null &&
                                 widget.student.image!.isNotEmpty
-                            ? Image.file(
-                                File(widget.student.image!),
+                            ? Image.memory(
+                                base64Decode(widget.student.image!),
                                 fit: BoxFit.cover,
                               )
                             : const Center(

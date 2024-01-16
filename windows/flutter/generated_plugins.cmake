@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   camera_windows
   file_selector_windows
   flutter_acrylic
+  image_compression_flutter
   screen_retriever
   window_manager
 )

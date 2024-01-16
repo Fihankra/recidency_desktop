@@ -6,24 +6,19 @@ import 'package:residency_desktop/core/functions/export/export_data.dart';
 import 'package:residency_desktop/core/widgets/custom_dialog.dart';
 import 'package:residency_desktop/database/connection.dart';
 import 'package:residency_desktop/features/auth/provider/mysefl_provider.dart';
+import 'package:residency_desktop/features/container/provider/main_provider.dart';
 import 'package:residency_desktop/features/keyFlow/data/key_flow.model.dart';
 import 'package:residency_desktop/features/keyFlow/usecase/key_flow_usecase.dart';
 import 'package:residency_desktop/features/settings/provider/settings_provider.dart';
 import 'package:residency_desktop/features/students/data/students_model.dart';
 import 'package:residency_desktop/utils/application_utils.dart';
 
-final keyLogFutureProvider = FutureProvider<List<KeyLogModel>>((ref) async {
-  var db = ref.watch(dbProvider);
-  var settings = ref.watch(settingsProvider);
-  final data =
-      await KeyFlowUseCase(db: db!).getKeyFlows(settings.academicYear!);
-  data.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
-  return data;
-});
 
-final keyLogProvider = StateNotifierProvider.family<KeyLogNotifier,
-    TableModel<KeyLogModel>, List<KeyLogModel>>((ref, data) {
-  return KeyLogNotifier(data);
+
+final keyLogProvider = StateNotifierProvider
+    .autoDispose<KeyLogNotifier, TableModel<KeyLogModel>>(
+        (ref) {
+  return KeyLogNotifier(ref.watch(keyLogDataProvider));
 });
 
 class KeyLogNotifier extends StateNotifier<TableModel<KeyLogModel>> {
@@ -193,6 +188,10 @@ class KeyLogNotifier extends StateNotifier<TableModel<KeyLogModel>> {
 
   void exportKeyLogs(
       {required String dataLength, required String format}) async {
+         if (state.items.isEmpty) {
+      CustomDialog.showError(message: 'No data to export');
+      return;
+    }
     CustomDialog.showLoading(message: 'Exporting data to excel.......');
 
     var data = ExportData<KeyLogModel>(
@@ -226,10 +225,10 @@ class KeyLogNotifier extends StateNotifier<TableModel<KeyLogModel>> {
   }
 }
 
-final keyLogFilter = StateProvider<String>((ref) => 'All');
+final keyLogFilter = StateProvider.autoDispose<String>((ref) => 'All');
 
 final newKeyLogProvider =
-    StateNotifierProvider<NewKeyFlow, void>((ref) => NewKeyFlow());
+    StateNotifierProvider.autoDispose<NewKeyFlow, void>((ref) => NewKeyFlow());
 
 class NewKeyFlow extends StateNotifier<void> {
   NewKeyFlow() : super(KeyLogModel());
@@ -239,7 +238,7 @@ class NewKeyFlow extends StateNotifier<void> {
       required String activity,
       required StudentModel student}) async {
     CustomDialog.showLoading(message: 'Adding Key Activity....');
-    var db = ref.watch(dbProvider);
+    var dio = ref.watch(serverProvider);
     var settings = ref.watch(settingsProvider);
     var me = ref.watch(myselfProvider);
     var dateTime = DateTime.now().toUtc();
@@ -258,13 +257,19 @@ class NewKeyFlow extends StateNotifier<void> {
     keyLog.studentImage = student.image;
     keyLog.assistantImage = me.image;
     keyLog.id = AppUtils.getId();
-    var (status, message) = await KeyFlowUseCase(db: db!).addKeyFlow(keyLog);
-    ref.invalidate(keyLogFutureProvider);
+    var (status,data, message) = await KeyFlowUseCase(dio: dio!).addKeyFlow(keyLog);
     CustomDialog.dismiss();
     if (status) {
-      CustomDialog.showToast(message: message);
+      if(data!=null){
+        ref.read(keyLogDataProvider.notifier).addLog(data);
+        CustomDialog.showToast(
+            message: message ?? 'Activity added successfully');
+      }else{
+        CustomDialog.showError(message: message??'Failed to add activity');
+      }
+      
     } else {
-      CustomDialog.showError(message: message);
+      CustomDialog.showError(message: message??'Failed to add activity');
     }
   }
 }

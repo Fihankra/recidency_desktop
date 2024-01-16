@@ -1,30 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:open_app_file/open_app_file.dart';
+import 'package:residency_desktop/config/router/router_info.dart';
 import 'package:residency_desktop/core/data/table_model.dart';
 import 'package:residency_desktop/core/functions/export/export_data.dart';
 import 'package:residency_desktop/core/widgets/custom_dialog.dart';
 import 'package:residency_desktop/database/connection.dart';
+import 'package:residency_desktop/features/auth/provider/mysefl_provider.dart';
 import 'package:residency_desktop/features/complaints/data/complaints.model.dart';
 import 'package:residency_desktop/features/complaints/usecase/complaints_usecase.dart';
 import 'package:residency_desktop/features/settings/provider/settings_provider.dart';
+import 'package:residency_desktop/features/students/data/students_model.dart';
+import 'package:residency_desktop/utils/application_utils.dart';
 
-final complaintsFutureProvider =
-    FutureProvider.autoDispose<List<ComplaintsModel>>((ref) async {
-  var db = ref.read(dbProvider);
-  var settings = ref.watch(settingsProvider);
-  final data =
-      await ComplaintsUsecase(db: db!).getComplaints(settings.academicYear!);
+import '../../container/provider/main_provider.dart';
 
-  data.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
-  return data;
-});
-
-final complaintsProvider = StateNotifierProvider.family.autoDispose<
-    ComplaintsProvider,
-    TableModel<ComplaintsModel>,
-    List<ComplaintsModel>>((ref, complaints) {
-  return ComplaintsProvider(complaints);
+final complaintsProvider =
+    StateNotifierProvider<ComplaintsProvider, TableModel<ComplaintsModel>>(
+        (ref) {
+  return ComplaintsProvider(ref.watch(complaintDataProvider));
 });
 
 class ComplaintsProvider extends StateNotifier<TableModel<ComplaintsModel>> {
@@ -122,7 +117,6 @@ class ComplaintsProvider extends StateNotifier<TableModel<ComplaintsModel>> {
                   .contains(query.toLowerCase()) ||
               element.roomNumber!.toLowerCase().contains(query.toLowerCase()) ||
               element.type!.toLowerCase().contains(query.toLowerCase()) ||
-              element.severity!.toLowerCase().contains(query.toLowerCase()) ||
               element.status!.toLowerCase().contains(query.toLowerCase()) ||
               element.studentPhone!.toLowerCase().contains(query.toLowerCase()))
           .toList();
@@ -156,14 +150,36 @@ class ComplaintsProvider extends StateNotifier<TableModel<ComplaintsModel>> {
   }
 
   void updateStatus(
-      {required BuildContext context,
+      {required WidgetRef ref,
       required ComplaintsModel complaint,
-      required String status}) {}
+      required String newState}) async {
+    CustomDialog.showLoading(message: 'Updating status....');
+    var dio = ref.watch(serverProvider);
+    complaint = complaint.copyWith(status: () => newState);
+    var (status, data, message) =
+        await ComplaintsUsecase(dio: dio!).updateComplaint(complaint.toMap());
+    CustomDialog.dismiss();
+    if (status) {
+      if (data != null) {
+        if (data.status!.toLowerCase() == 'deleted') {
+          ref.read(complaintDataProvider.notifier).deleteComplaint(data.id!);
+        } else {
+          ref.read(complaintDataProvider.notifier).updateComplaint(data);
+        }
+      }
+      CustomDialog.showSuccess(message: message);
+      //clear form
+    } else {
+      CustomDialog.showError(message: message);
+    }
+  }
 
-
-      
   void exportComplaints(
       {required String dataLength, required String format}) async {
+    if (state.items.isEmpty) {
+      CustomDialog.showError(message: 'No data to export');
+      return;
+    }
     CustomDialog.showLoading(message: 'Exporting data to excel.......');
 
     var data = ExportData<ComplaintsModel>(
@@ -197,3 +213,76 @@ class ComplaintsProvider extends StateNotifier<TableModel<ComplaintsModel>> {
   }
 }
 
+final newComplaintsProvider =
+    StateNotifierProvider<NewComplaintsController, ComplaintsModel>((ref) {
+  return NewComplaintsController();
+});
+
+class NewComplaintsController extends StateNotifier<ComplaintsModel> {
+  NewComplaintsController() : super(ComplaintsModel());
+
+  void setStudent(StudentModel value) {
+    state = state.copyWith(
+        studentId: () => value.id!,
+        studentName: () => '${value.firstname} ${value.surname}',
+        studentPhone: () => value.phone,
+        roomNumber: () => value.room,
+        studentImage: () => value.image);
+  }
+
+  void setTitle(String? title) {
+    state = state.copyWith(title: () => title);
+  }
+
+  void setDescription(String? desc) {
+    state = state.copyWith(description: () => desc);
+  }
+
+  void setType(String string) {
+    state = state.copyWith(type: () => string);
+  }
+
+  void setSeverity(string) {
+    state = state.copyWith(severity: () => string);
+  }
+
+  void setLocation(String? value) {
+    state = state.copyWith(location: () => value);
+  }
+
+  void submitComplaint(
+      {required WidgetRef ref,
+      required GlobalKey<FormState> form,
+      required BuildContext context}) async {
+    CustomDialog.showLoading(message: 'Submitting Complaint....');
+    var dio = ref.watch(serverProvider);
+    var settings = ref.watch(settingsProvider);
+    var me = ref.watch(myselfProvider);
+    state = state.copyWith(
+        id: () => AppUtils.getId(),
+        assistantId: () => me.id,
+        assistantName: () => '${me.firstname} ${me.surname}',
+        academicYear: () => settings.academicYear,
+        status: () => 'Pending',
+        createdAt: () => DateTime.now().millisecondsSinceEpoch);
+    var (status, data, message) =
+        await ComplaintsUsecase(dio: dio!).addComplaint(state);
+    CustomDialog.dismiss();
+    if (status) {
+      if (data != null) {
+        ref.read(complaintDataProvider.notifier).addComplaint(data);
+        CustomDialog.showSuccess(
+            message: message ?? 'Complaint submitted successfully');
+        //clear form
+        state = ComplaintsModel();
+        form.currentState!.reset();
+        context.go(RouterInfo.complaintsRoute.path);
+      } else {
+        CustomDialog.showError(
+            message: message ?? 'Failed to submit complaint');
+      }
+    } else {
+      CustomDialog.showError(message: message ?? 'Failed to submit complaint');
+    }
+  }
+}

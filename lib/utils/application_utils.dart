@@ -1,40 +1,41 @@
+import 'dart:convert';
 import 'dart:io';
-import 'package:crypt/crypt.dart';
+import 'package:image_compression_flutter/image_compression_flutter.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 
 class AppUtils {
-  static Future<String> createFolderInAppDocDir(String folderName) async {
-    //Get this App Document Directory
-    // final Directory appDocDir = await getApplicationDocumentsDirectory();
-    //App Document Directory + folder name
-    final Directory appDocDirFolder =
-        Directory('Public/$folderName/');
-
-    if (await appDocDirFolder.exists()) {
-      //if folder already exists return path
-      return appDocDirFolder.path;
-    } else {
-      //if folder not exists create folder and then return its path
-      final Directory appDocDirNewFolder =
-          await appDocDirFolder.create(recursive: true);
-      return appDocDirNewFolder.path;
+  static Future<(bool, String?)> endCodeimage({required File image}) async {
+    try {
+      ImageFile input = ImageFile(
+        filePath: image.path,
+        rawBytes: image.readAsBytesSync(),
+      );
+      //if size is less than 500kb then return
+      if (input.sizeInBytes < 500000) {
+        var data = base64Encode(input.rawBytes);
+        return Future.value((true, data));
+      }
+      Configuration config = const Configuration(
+        outputType: ImageOutputType.webpThenJpg,
+        useJpgPngNativeCompressor: false,
+        // set quality between 0-100
+        quality: 10,
+      );
+      final param = ImageFileConfiguration(input: input, config: config);
+      final output = await compressor.compress(param);
+      var data = base64Encode(output.rawBytes);
+      return Future.value((true, data));
+    } catch (_) {
+      return Future.value((false, null));
     }
   }
 
 
-  static String getId(){
+
+  static String getId() {
     var id = const Uuid().v1();
     return id.hashCode.toString();
   }
 
-  static String key = 'residency';
-  static String hashPassword(String password) {
-    var crypt = Crypt.sha256(password, salt: key);
-    return crypt.toString();
-  }
 
-  static bool comparePassword(String password, String hash) {
-    var crypt = Crypt(hash);
-    return crypt.match(password);
-  }
 }

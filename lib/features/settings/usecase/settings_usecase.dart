@@ -1,21 +1,25 @@
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:dio/dio.dart';
 import 'package:residency_desktop/core/widgets/custom_dialog.dart';
 import 'package:residency_desktop/features/settings/data/settings_model.dart';
 import 'package:residency_desktop/features/settings/repo/settings_repo.dart';
 
 class SettingsUseCase extends SettingsRepository {
-  final Db db;
-  SettingsUseCase({required this.db});
+  final Dio dio;
+  SettingsUseCase({required this.dio});
   @override
   Future<SettingsModel?> loadSettings() async {
     try {
-      if (db.state != State.open) {
-        await db.open();
-      }
-      var coll = db.collection('settings');
-      Map<String, dynamic>? data = await coll.findOne();
-      if (data != null) {
-        return Future.value(SettingsModel.fromMap(data));
+      var responds = await dio.get('settings');
+      if (responds.statusCode == 200) {
+        if (responds.data['success']) {
+          if(responds.data['data']==null){
+            return Future.value(null);
+          }
+          var data = responds.data['data'];
+          return Future.value(SettingsModel.fromMap(data));
+        } else {
+          return Future.value(null);
+        }
       } else {
         return Future.value(null);
       }
@@ -28,29 +32,19 @@ class SettingsUseCase extends SettingsRepository {
   @override
   Future<(Exception?, String?)> saveSettings(SettingsModel settings) async {
     try {
-      if (db.state != State.open) {
-        await db.open();
-      }
-      var coll = db.collection('settings');
-      var data = await coll.findOne();
-      if (data != null) {
-        await coll.update(
-          where.eq('_id', data['_id']),
-          settings.toMap(),
-        );
-        return Future.value((null, 'Settings Updated Successfully'));
+      var responds = await dio.post('settings', data: settings.toMap());
+      if (responds.statusCode == 200) {
+        if (responds.data['success']) {
+          var message = responds.data['message'];
+          return Future.value((null, message.toString()));
+        } else {
+          return Future.value((Exception(responds.data['message']), null));
+        }
       } else {
-        await coll.insert(settings.toMap());
-        return Future.value((null, 'Settings Saved Successfully'));
+        return Future.value((Exception('Error saving settings'), null));
       }
     } catch (e) {
       return Future.value((Exception(e), null));
     }
-  }
-
-  @override
-  Future<(Exception?, String?)> updateSettings(SettingsModel settings) {
-    // TODO: implement updateSettings
-    throw UnimplementedError();
   }
 }

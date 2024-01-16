@@ -33,6 +33,10 @@ class CustomDropDown extends StatelessWidget {
     return DropdownButtonHideUnderline(
         child: DropdownButtonFormField(
       borderRadius: BorderRadius.circular(5),
+      style: getTextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+          color: Theme.of(context).textTheme.labelLarge!.color),
       decoration: InputDecoration(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radius ?? 5),
@@ -64,12 +68,12 @@ class CustomDropDown extends StatelessWidget {
               )
             : null,
         contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
-        labelStyle: getTextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        labelStyle: getTextStyle(),
         labelText: label,
         hintText: hintText,
         focusColor: Theme.of(context).colorScheme.secondary,
         iconColor: Theme.of(context).colorScheme.secondary,
-        hintStyle: getTextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        hintStyle: getTextStyle(),
       ),
       onChanged: onChanged,
       onSaved: onSaved,

@@ -1,7 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:residency_desktop/config/router/router_info.dart';
 import 'package:residency_desktop/core/constants/role_enum.dart';
 import 'package:residency_desktop/core/provider/navigation_provider.dart';
@@ -10,19 +10,18 @@ import 'package:residency_desktop/database/connection.dart';
 import 'package:residency_desktop/features/auth/provider/mysefl_provider.dart';
 import 'package:residency_desktop/features/core/usecase/user_usecase.dart';
 import 'package:residency_desktop/features/settings/provider/settings_provider.dart';
-import 'package:residency_desktop/utils/application_utils.dart';
 import '../data/auth_model.dart';
 
 final authProvider = StateNotifierProvider<AuthProvider, AuthModel>((ref) {
-  var db = ref.watch(dbProvider);
-  return AuthProvider(db!);
+  var dio = ref.watch(serverProvider);
+  return AuthProvider(dio);
 });
 
 class AuthProvider extends StateNotifier<AuthModel> {
   AuthProvider(
-    this.db,
+    this.dio,
   ) : super(AuthModel());
-  final Db db;
+  final Dio? dio;
   void setId(String? id) {
     state = state.copyWith(id: () => id);
   }
@@ -33,19 +32,46 @@ class AuthProvider extends StateNotifier<AuthModel> {
 
   void login({required BuildContext context, required WidgetRef ref}) async {
     CustomDialog.showLoading(message: 'Logging in...');
+    if (dio == null) {
+      ref.invalidate(serverFuture);
+      var server = ref.watch(serverFuture);
+      server.when(
+          data: (value) {
+            var server = ref.watch(serverProvider);
+            CustomDialog.dismiss();
+            if (server == null) {
+              CustomDialog.showError(
+                  message:
+                      'Unable to connect to server. Contact system administrator');
+            } else {
+              CustomDialog.showSuccess(message: 'Server refreshed, try again');
+            }
+          },
+          loading: () {},
+          error: (error, stackTrace) {
+            CustomDialog.dismiss();
+            CustomDialog.showError(
+                message:
+                    'Unable to connect to server, please check your network connection (Cable). Contact your system administrator if problem persist');
+          });
+
+      return;
+    }
     var (exception, user) =
-        await UserUseCase(db: db).loginUser(state.id!, state.password!);
+        await UserUseCase(dio: dio!).loginUser(state.id!, state.password!);
     if (exception != null) {
       CustomDialog.dismiss();
       CustomDialog.showError(
-        message: exception.toString(),
+        message: exception.toString().contains('Dio')
+            ? 'Unable to connect to server, please check your network connection (Cable). Contact your system administrator if problem persist'
+            : exception.toString(),
       );
     } else {
       if (user != null) {
         CustomDialog.dismiss();
 
         ref.read(myselfProvider.notifier).setMyself(user);
-        if (AppUtils.comparePassword(user.id!, user.password!)) {
+        if (state.id == state.password) {
           CustomDialog.showSuccess(
             message: 'You are using default password, please change it',
           );

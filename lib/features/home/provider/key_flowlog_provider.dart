@@ -1,15 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:residency_desktop/features/container/provider/main_provider.dart';
 import 'package:residency_desktop/features/home/data/key_flow_model.dart';
 import 'package:residency_desktop/features/keyFlow/data/key_flow.model.dart';
 import 'package:residency_desktop/features/students/data/students_model.dart';
 
-final keyflowProvider = StateNotifierProvider.family<
-    KeyFlowProvider,
-    KeyFlowModel,
-    (
-      List<StudentModel>,
-      List<KeyLogModel>
-    )>((ref, data) => KeyFlowProvider(data));
+final keyflowProvider = StateNotifierProvider.autoDispose<KeyFlowProvider, KeyFlowModel>(
+    (ref) => KeyFlowProvider(
+        (ref.watch(studentDataProvider), ref.watch(keyLogDataProvider))));
 
 class KeyFlowProvider extends StateNotifier<KeyFlowModel> {
   KeyFlowProvider(this.data)
@@ -26,9 +23,9 @@ class KeyFlowProvider extends StateNotifier<KeyFlowModel> {
               (element) => element.room!.toLowerCase() == value.toLowerCase())
           .toList();
       //limit to onlu 4 students
-      if (filteredStudents.length > 4) {
-        filteredStudents = filteredStudents.sublist(0, 4);
-      }
+      // if (filteredStudents.length > 4) {
+      //   filteredStudents = filteredStudents.sublist(0, 4);
+      // }
       state = state.copyWith(students: filteredStudents);
 
       var filteredKeyLogs = keyLogs
@@ -40,7 +37,7 @@ class KeyFlowProvider extends StateNotifier<KeyFlowModel> {
         filteredKeyLogs.sort((a, b) => b.createdAt!.compareTo((a.createdAt!)));
         state = state.copyWith(lastKeyLog: filteredKeyLogs.first);
       } else {
-       state = state.copyWith( lastKeyLog: KeyLogModel());
+        state = state.copyWith(lastKeyLog: KeyLogModel());
       }
     } else {
       state = state.copyWith(students: [], lastKeyLog: KeyLogModel());

@@ -9,12 +9,11 @@ import 'package:residency_desktop/core/widgets/components/page_headers.dart';
 import 'package:residency_desktop/core/widgets/table/data/models/custom_table_columns_model.dart';
 import 'package:residency_desktop/core/widgets/table/data/models/custom_table_rows_model.dart';
 import 'package:residency_desktop/core/widgets/table/widgets/custom_table.dart';
-import 'package:residency_desktop/features/staffs/provider/staff_provider.dart';
-import 'package:residency_desktop/features/complaints/provider/complaints_provider.dart';
 import 'package:residency_desktop/features/dashboard/data/attendance_model.dart';
 import 'package:residency_desktop/features/dashboard/provider/attendance_provider.dart';
 import 'package:residency_desktop/features/dashboard/views/components/dashboard_card.dart';
-import 'package:residency_desktop/features/students/provider/student_provider.dart';
+
+import '../../container/provider/main_provider.dart';
 
 class AdminDashboard extends ConsumerStatefulWidget {
   const AdminDashboard({super.key});
@@ -26,9 +25,6 @@ class AdminDashboard extends ConsumerStatefulWidget {
 class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
-    var studentsData = ref.watch(studentFutureProvider);
-    var assistantsData = ref.watch(staffFutureProvider);
-    var complaintsData = ref.watch(complaintsFutureProvider);
     var attendancesData = ref.watch(attendanceFutureProvider);
     return Container(
         padding: const EdgeInsets.all(8),
@@ -58,90 +54,33 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                         alignment: WrapAlignment.center,
                         runAlignment: WrapAlignment.center,
                         children: [
-                          studentsData.when(
-                            data: (data) {
-                              return DashBoardCard(
-                                title: 'Students',
-                                value: data.length.toString(),
-                                icon: MdiIcons.school,
-                                color: Colors.blue,
-                              );
-                            },
-                            loading: () {
-                              return DashBoardCard(
-                                title: 'Students',
-                                value: null,
-                                icon: MdiIcons.school,
-                                color: Colors.blue,
-                                isLoading: true,
-                              );
-                            },
-                            error: (error, stack) {
-                              return DashBoardCard(
-                                title: 'Error',
-                                value: '',
-                                icon: MdiIcons.school,
-                                color: Colors.blue,
-                                isLoading: false,
-                              );
-                            },
+                          DashBoardCard(
+                            title: 'Students',
+                            value: ref
+                                .watch(studentDataProvider)
+                                .length
+                                .toString(),
+                            icon: MdiIcons.school,
+                            color: Colors.blue,
                           ),
-                          assistantsData.when(
-                            data: (data) {
-                              return DashBoardCard(
-                                title: 'Assistants',
-                                value: data.length.toString(),
-                                icon: MdiIcons.accountGroup,
-                                color: Colors.green,
-                              );
-                            },
-                            loading: () {
-                              return DashBoardCard(
-                                title: 'Assistants',
-                                value: null,
-                                icon: MdiIcons.accountGroup,
-                                color: Colors.green,
-                                isLoading: true,
-                              );
-                            },
-                            error: (error, stack) {
-                              return DashBoardCard(
-                                title: 'Error',
-                                value: '',
-                                icon: MdiIcons.accountGroup,
-                                color: Colors.green,
-                                isLoading: false,
-                              );
-                            },
+                          DashBoardCard(
+                            title: 'Assistants',
+                            value:
+                                ref.watch(staffDataProvider).length.toString(),
+                            icon: MdiIcons.accountGroup,
+                            color: Colors.green,
                           ),
-                          complaintsData.when(
-                            data: (data) {
-                              return DashBoardCard(
+                        
+                               DashBoardCard(
                                 title: 'Complaints',
-                                value: data.length.toString(),
+                                value: ref
+                                    .watch(complaintDataProvider)
+                                    .length
+                                    .toString(),
                                 icon: FontAwesomeIcons.listCheck,
                                 color: Colors.red,
-                              );
-                            },
-                            loading: () {
-                              return const DashBoardCard(
-                                title: 'Complaints',
-                                value: null,
-                                icon: FontAwesomeIcons.listCheck,
-                                color: Colors.red,
-                                isLoading: true,
-                              );
-                            },
-                            error: (error, stack) {
-                              return const DashBoardCard(
-                                title: 'Error',
-                                value: '',
-                                icon: FontAwesomeIcons.listCheck,
-                                color: Colors.red,
-                                isLoading: false,
-                              );
-                            },
-                          ),
+                              )
+                          
                         ],
                       ),
                     ),

@@ -7,10 +7,9 @@ import 'package:residency_desktop/core/constants/role_enum.dart';
 import 'package:residency_desktop/core/widgets/components/page_headers.dart';
 import 'package:residency_desktop/core/widgets/custom_input.dart';
 import 'package:residency_desktop/features/auth/provider/mysefl_provider.dart';
+import 'package:residency_desktop/features/container/provider/main_provider.dart';
 import 'package:residency_desktop/features/home/provider/key_flowlog_provider.dart';
 import 'package:residency_desktop/features/home/views/componenets/student_card.dart';
-import 'package:residency_desktop/features/keyFlow/provider/key_flow_provider.dart';
-import 'package:residency_desktop/features/students/provider/student_provider.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -22,14 +21,15 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   @override
   void dispose() {
-    ref.invalidate(keyflowProvider);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    var studentsFuture = ref.watch(studentFutureProvider);
-    var keyLogsFuture = ref.watch(keyLogFutureProvider);
+    var keyFlow =
+        ref.watch(keyflowProvider);
+    var keyFlowRead = ref
+        .read(keyflowProvider.notifier);
     var me = ref.read(myselfProvider);
     return Container(
       padding: const EdgeInsets.all(15),
@@ -45,20 +45,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           height: 25,
         ),
         Expanded(
-          child: studentsFuture.when(data: (students) {
-            return keyLogsFuture.when(
-                error: (error, stackTrace) => const Center(
-                      child: Text('Error getting key logs'),
-                    ),
-                loading: () => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                data: (keys) {
-                  var keyFlow = ref.watch(keyflowProvider((students, keys)));
-                  var keyFlowRead =
-                      ref.read(keyflowProvider((students, keys)).notifier);
-
-                  return Padding(
+          child:  Padding(
                     padding: const EdgeInsets.all(10),
                     child: Column(
                       children: [
@@ -315,13 +302,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                         )
                       ],
                     ),
-                  );
-                });
-          }, loading: () {
-            return const Center(child: CircularProgressIndicator());
-          }, error: (error, stackTrace) {
-            return const Center(child: Text('Error getting students'));
-          }),
+                  )
+                
+          
         )
       ]),
     );

@@ -8,7 +8,6 @@ abstract class UserRepo {
 
   //login user
   Future<(Exception?, UserModel?)> loginUser(String id, String password);
-  Future<void> creatAdmin();
   
 
   

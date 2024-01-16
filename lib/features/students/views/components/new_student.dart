@@ -8,7 +8,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:residency_desktop/config/theme/theme.dart';
 import 'package:residency_desktop/core/constants/departments.dart';
-import 'package:residency_desktop/core/provider/image_provider.dart';
 import 'package:residency_desktop/core/widgets/components/page_headers.dart';
 import 'package:residency_desktop/core/widgets/custom_button.dart';
 import 'package:residency_desktop/core/widgets/custom_dialog.dart';
@@ -31,7 +30,6 @@ class _NewStudentState extends ConsumerState<NewStudent> {
   CameraDescription? selectedCamera;
   CameraController? controller;
   bool isCameraOn = false;
-
 
   @override
   void initState() {
@@ -102,7 +100,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
     }
     setState(() {
       controller = null;
-      ref.invalidate(imageProvider);
+      ref.invalidate(studentImageProvider);
       isCameraOn = false;
     });
   }
@@ -119,7 +117,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
         isCameraOn = false;
       });
       ref
-          .read(imageProvider.notifier)
+          .read(studentImageProvider.notifier)
           .setImage(image: image, isCaptured: false);
     }
   }
@@ -138,7 +136,9 @@ class _NewStudentState extends ConsumerState<NewStudent> {
     setState(() {
       controller = null;
     });
-    ref.read(imageProvider.notifier).setImage(image: path, isCaptured: true);
+    ref
+        .read(studentImageProvider.notifier)
+        .setImage(image: path, isCaptured: true);
   }
 
   @override
@@ -208,9 +208,9 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                                 label: 'Student ID',
                                 hintText: 'Enter student ID',
                                 prefixIcon: MdiIcons.idCard,
+                                isDigitOnly: true,
                                 onSaved: (value) {
-                                 studentNotifier
-                                      .setStudentId(value!);
+                                  studentNotifier.setStudentId(value!);
                                 },
                                 validator: (value) {
                                   if (value!.isEmpty) {
@@ -230,8 +230,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                               child: CustomDropDown(
                                 prefixIcon: FontAwesomeIcons.genderless,
                                 onSaved: (value) {
-                                 studentNotifier
-                                      .setGender(value!);
+                                  studentNotifier.setGender(value!);
                                 },
                                 label: 'Gender',
                                 onChanged: (value) {},
@@ -243,7 +242,6 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                                     return null;
                                   }
                                 },
-                               
                                 items: const [
                                   //male and female
                                   DropdownMenuItem(
@@ -267,8 +265,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                           hintText: 'Enter First Name',
                           prefixIcon: Icons.person,
                           onSaved: (name) {
-                            studentNotifier
-                                .setFirstName(name!);
+                            studentNotifier.setFirstName(name!);
                           },
                           validator: (value) {
                             if (value!.isEmpty) {
@@ -287,8 +284,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                           hintText: 'Enter Surname',
                           prefixIcon: Icons.person,
                           onSaved: (name) {
-                          studentNotifier
-                                .setSurname(name!);
+                            studentNotifier.setSurname(name!);
                           },
                           validator: (value) {
                             if (value!.isEmpty) {
@@ -313,8 +309,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                           hintText: 'Select student department',
                           onChanged: (value) {},
                           onSaved: (department) {
-                            studentNotifier
-                                .setDepartment(department!);
+                            studentNotifier.setDepartment(department!);
                           },
                           prefixIcon: Icons.school,
                           validator: (value) {
@@ -334,10 +329,11 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                               child: CustomTextFields(
                                 label: 'Phone Number',
                                 hintText: 'Enter Phone Number',
+                                isDigitOnly: true,
+                                max: 10,
                                 prefixIcon: Icons.phone,
                                 onSaved: (phone) {
-                                  studentNotifier
-                                      .setPhone(phone!);
+                                  studentNotifier.setPhone(phone!);
                                 },
                                 validator: (value) {
                                   if (value!.isEmpty) {
@@ -364,8 +360,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                                 hintText: 'Select student level',
                                 onChanged: (value) {},
                                 onSaved: (level) {
-                                  studentNotifier
-                                      .setLevel(level!);
+                                  studentNotifier.setLevel(level!);
                                 },
                                 prefixIcon: FontAwesomeIcons.arrowTurnUp,
                                 validator: (value) {
@@ -390,8 +385,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                                 prefixIcon: Icons.home,
                                 onChanged: (value) {},
                                 onSaved: (block) {
-                                  studentNotifier
-                                      .setBlock(block!);
+                                  studentNotifier.setBlock(block!);
                                 },
                                 items: [
                                   'Block A',
@@ -425,8 +419,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                                 isDigitOnly: true,
                                 max: 2,
                                 onSaved: (room) {
-                                  studentNotifier
-                                      .setRoom(room!);
+                                  studentNotifier.setRoom(room!);
                                 },
                                 validator: (value) {
                                   if (value!.isEmpty) {
@@ -448,18 +441,9 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                           icon: MdiIcons.creation,
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              // if(ref.watch(imageProvider).image==null){
-                              //  ref.read(imageProvider.notifier).setError('Please select student picture');
-                              //   return;
-                              // }
-                              //save form
                               _formKey.currentState!.save();
-                              //todo create student
-                              studentNotifier
-                                  .createStudent(
-                                      context: context,
-                                      ref: ref,
-                                      form: _formKey);
+                              studentNotifier.createStudent(
+                                  context: context, ref: ref, form: _formKey);
                             }
                           },
                         )
@@ -476,6 +460,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
           )),
     );
   }
+
   Widget _buildCamera() {
     return Container(
         width: 300,
@@ -499,14 +484,11 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                   value: selectedCamera,
                   items: cameras
                       .map(
-                        (e) =>
-                        DropdownMenuItem(
+                        (e) => DropdownMenuItem(
                           value: e,
-                          child: Text(e.name
-                              .split('<')
-                              .first),
+                          child: Text(e.name.split('<').first),
                         ),
-                  )
+                      )
                       .toList(),
                   onChanged: (value) {
                     changeCamera(value!);
@@ -527,33 +509,26 @@ class _NewStudentState extends ConsumerState<NewStudent> {
               width: 200,
               decoration: BoxDecoration(
                   border: Border.all(), borderRadius: BorderRadius.circular(5)),
-              child: ref.watch(imageProvider).image != null
+              child: ref.watch(studentImageProvider).image != null
                   ? Image.file(
-                File(ref.watch(imageProvider).image!.path),
-                fit: BoxFit.cover,
-              )
+                      File(ref.watch(studentImageProvider).image!.path),
+                      fit: BoxFit.cover,
+                    )
                   : controller != null &&
-                  controller!.value.isInitialized &&
-                  isCameraOn
-                  ? CameraPreview(controller!)
-                  : const Center(
-                child: Icon(
-                  Icons.person,
-                  size: 100,
-                ),
-              ),
-            ),
-            Text(
-             ref.watch(imageProvider).error ?? '',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: getTextStyle(fontSize: 12, color: Colors.red),
+                          controller!.value.isInitialized &&
+                          isCameraOn
+                      ? CameraPreview(controller!)
+                      : const Center(
+                          child: Icon(
+                            Icons.person,
+                            size: 100,
+                          ),
+                        ),
             ),
             const SizedBox(
               height: 15,
             ),
-            if ( ref.watch(imageProvider).image != null)
+            if (ref.watch(studentImageProvider).image != null)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -584,10 +559,7 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                 children: [
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme
-                            .of(context)
-                            .colorScheme
-                            .surface,
+                        backgroundColor: Theme.of(context).colorScheme.surface,
                         padding: const EdgeInsets.symmetric(
                             vertical: 2, horizontal: 10),
                         shape: RoundedRectangleBorder(
@@ -625,12 +597,33 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                       )),
                 ],
               )
-            else
-              if (ref.watch(imageProvider).image == null && !isCameraOn)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton.icon(
+            else if (ref.watch(studentImageProvider).image == null &&
+                !isCameraOn)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 2, horizontal: 10),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5))),
+                    icon: const Icon(
+                      Icons.file_upload,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                    onPressed: () async {
+                      pickImage();
+                    },
+                    label: const Text('From files',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           padding: const EdgeInsets.symmetric(
@@ -638,42 +631,20 @@ class _NewStudentState extends ConsumerState<NewStudent> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5))),
                       icon: const Icon(
-                        Icons.file_upload,
+                        Icons.camera_alt_outlined,
                         size: 16,
                         color: Colors.white,
                       ),
                       onPressed: () async {
-                        pickImage();
+                        startCamera();
                       },
-                      label: const Text('From files',
-                          style: TextStyle(color: Colors.white)),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 2, horizontal: 10),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5))),
-                        icon: const Icon(
-                          Icons.camera_alt_outlined,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        onPressed: () async {
-                          startCamera();
-                        },
-                        label: const Text(
-                          'From camera',
-                          style: TextStyle(color: Colors.white),
-                        )),
-                  ],
-                )
+                      label: const Text(
+                        'From camera',
+                        style: TextStyle(color: Colors.white),
+                      )),
+                ],
+              )
           ],
         ));
   }
-
 }

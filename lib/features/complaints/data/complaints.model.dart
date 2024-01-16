@@ -6,6 +6,8 @@ class ComplaintsModel {
   String? id;
   String? title;
   String? description;
+  String? assistantId;
+  String? assistantName;
   String? studentId;
   String? studentName;
   String? studentPhone;
@@ -16,21 +18,25 @@ class ComplaintsModel {
   String? severity;
   String? academicYear;
   List<String>? images;
+  String? location;
   int? createdAt;
   ComplaintsModel({
     this.id,
     this.title,
     this.description,
+    this.assistantId,
+    this.assistantName,
     this.studentId,
     this.studentName,
     this.studentPhone,
     this.studentImage,
-    this.status,
+    this.status='Pending',
     this.roomNumber,
     this.type,
     this.severity,
     this.academicYear,
-    this.images,
+    this.images=const [],
+    this.location,
     this.createdAt,
   });
 
@@ -38,6 +44,8 @@ class ComplaintsModel {
     ValueGetter<String?>? id,
     ValueGetter<String?>? title,
     ValueGetter<String?>? description,
+    ValueGetter<String?>? assistantId,
+    ValueGetter<String?>? assistantName,
     ValueGetter<String?>? studentId,
     ValueGetter<String?>? studentName,
     ValueGetter<String?>? studentPhone,
@@ -48,12 +56,15 @@ class ComplaintsModel {
     ValueGetter<String?>? severity,
     ValueGetter<String?>? academicYear,
     ValueGetter<List<String>?>? images,
+    ValueGetter<String?>? location,
     ValueGetter<int?>? createdAt,
   }) {
     return ComplaintsModel(
       id: id?.call() ?? this.id,
       title: title?.call() ?? this.title,
       description: description?.call() ?? this.description,
+      assistantId: assistantId?.call() ?? this.assistantId,
+      assistantName: assistantName?.call() ?? this.assistantName,
       studentId: studentId?.call() ?? this.studentId,
       studentName: studentName?.call() ?? this.studentName,
       studentPhone: studentPhone?.call() ?? this.studentPhone,
@@ -64,6 +75,7 @@ class ComplaintsModel {
       severity: severity?.call() ?? this.severity,
       academicYear: academicYear?.call() ?? this.academicYear,
       images: images?.call() ?? this.images,
+      location: location?.call() ?? this.location,
       createdAt: createdAt?.call() ?? this.createdAt,
     );
   }
@@ -73,6 +85,8 @@ class ComplaintsModel {
       'id': id,
       'title': title,
       'description': description,
+      'assistantId': assistantId,
+      'assistantName': assistantName,
       'studentId': studentId,
       'studentName': studentName,
       'studentPhone': studentPhone,
@@ -83,6 +97,7 @@ class ComplaintsModel {
       'severity': severity,
       'academicYear': academicYear,
       'images': images,
+      'location': location,
       'createdAt': createdAt,
     };
   }
@@ -92,6 +107,8 @@ class ComplaintsModel {
       id: map['id'],
       title: map['title'],
       description: map['description'],
+      assistantId: map['assistantId'],
+      assistantName: map['assistantName'],
       studentId: map['studentId'],
       studentName: map['studentName'],
       studentPhone: map['studentPhone'],
@@ -102,6 +119,7 @@ class ComplaintsModel {
       severity: map['severity'],
       academicYear: map['academicYear'],
       images: List<String>.from(map['images']),
+      location: map['location'],
       createdAt: map['createdAt']?.toInt(),
     );
   }
@@ -113,7 +131,7 @@ class ComplaintsModel {
 
   @override
   String toString() {
-    return 'ComplaintsModel(id: $id, title: $title, description: $description, studentId: $studentId, studentName: $studentName, studentPhone: $studentPhone, studentImage: $studentImage, status: $status, roomNumber: $roomNumber, type: $type, severity: $severity, academicYear: $academicYear, images: $images, createdAt: $createdAt)';
+    return 'ComplaintsModel(id: $id, title: $title, description: $description, assistantId: $assistantId, assistantName: $assistantName, studentId: $studentId, studentName: $studentName, studentPhone: $studentPhone, studentImage: $studentImage, status: $status, roomNumber: $roomNumber, type: $type, severity: $severity, academicYear: $academicYear, images: $images, location: $location, createdAt: $createdAt)';
   }
 
   @override
@@ -124,6 +142,8 @@ class ComplaintsModel {
       other.id == id &&
       other.title == title &&
       other.description == description &&
+      other.assistantId == assistantId &&
+      other.assistantName == assistantName &&
       other.studentId == studentId &&
       other.studentName == studentName &&
       other.studentPhone == studentPhone &&
@@ -134,6 +154,7 @@ class ComplaintsModel {
       other.severity == severity &&
       other.academicYear == academicYear &&
       listEquals(other.images, images) &&
+      other.location == location &&
       other.createdAt == createdAt;
   }
 
@@ -142,6 +163,8 @@ class ComplaintsModel {
     return id.hashCode ^
       title.hashCode ^
       description.hashCode ^
+      assistantId.hashCode ^
+      assistantName.hashCode ^
       studentId.hashCode ^
       studentName.hashCode ^
       studentPhone.hashCode ^
@@ -152,10 +175,11 @@ class ComplaintsModel {
       severity.hashCode ^
       academicYear.hashCode ^
       images.hashCode ^
+      location.hashCode ^
       createdAt.hashCode;
   }
 
-   List<String>excelHeadings() {
+  List<String> excelHeadings() {
     return [
       'Title',
       'Description',
@@ -172,19 +196,16 @@ class ComplaintsModel {
 
   List<String> excelData(ComplaintsModel item) {
     return [
-      item.title!,
-      item.description!,
-      item.studentName!,
-      item.studentPhone!,
-      item.roomNumber!,
-      item.type!,
-      item.severity!,
-      item.status!,
-      item.academicYear!,
+      item.title??'',
+      item.description??'',
+      item.studentName??'',
+      item.studentPhone??'',
+      item.roomNumber??'',
+      item.type??'',
+      item.severity??'',
+      item.status??'',
+      item.academicYear??'',
       item.createdAt.toString(),
     ];
-
   }
-
-
 }

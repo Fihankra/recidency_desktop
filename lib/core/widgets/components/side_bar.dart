@@ -129,14 +129,14 @@ class _SideBarState extends ConsumerState<SideBar> {
                   if (isAdmin)
                     SideBarItem(
                         title: 'Allocations',
-                        route: RouterInfo.homeRoute,
+                        route: RouterInfo.allocationRoute,
                         icon: FontAwesomeIcons.rectangleList,
                         width: sideWidth,
                         onTap: () {
-                          _gotoPage(RouterInfo.homeRoute);
+                          _gotoPage(RouterInfo.allocationRoute);
                         },
                         isSelected: ref.watch(navProvider) ==
-                            RouterInfo.homeRoute.routeName),
+                            RouterInfo.allocationRoute.routeName),
 
                   SideBarItem(
                     title: 'Key Logs',

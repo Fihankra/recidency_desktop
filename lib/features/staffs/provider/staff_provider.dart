@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:open_app_file/open_app_file.dart';
 import 'package:residency_desktop/config/router/router_info.dart';
 import 'package:residency_desktop/core/data/table_model.dart';
@@ -9,18 +10,10 @@ import 'package:residency_desktop/core/functions/export/export_data.dart';
 import 'package:residency_desktop/core/provider/image_provider.dart';
 import 'package:residency_desktop/core/widgets/custom_dialog.dart';
 import 'package:residency_desktop/database/connection.dart';
+import 'package:residency_desktop/features/container/provider/main_provider.dart';
 import 'package:residency_desktop/features/staffs/usecase/staff_usecases.dart';
-import 'package:residency_desktop/features/settings/provider/settings_provider.dart';
 import 'package:residency_desktop/utils/application_utils.dart';
 import '../data/staff_model.dart';
-
-final staffFutureProvider = FutureProvider<List<StaffModel>>((ref) async {
-  var db = ref.watch(dbProvider);
-  var data = await StaffUsecase(db: db!).getStaffs();
-
-  data.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
-  return data;
-});
 
 final newStaffProvider =
     StateNotifierProvider<NewStaffNotifier, StaffModel>((ref) {
@@ -76,118 +69,44 @@ class NewStaffNotifier extends StateNotifier<StaffModel> {
     CustomDialog.showLoading(
       message: 'Creating Staff.......',
     );
-    var db = ref.watch(dbProvider);
-    // var settings = ref.watch(settingsProvider);
-    // check id does not already exist
-    var exists = await StaffUsecase(db: db!).staffExists(state.id!);
-    if (exists != null) {
-      if (exists.isDeleted == false) {
-        CustomDialog.dismiss();
-        CustomDialog.showError(
-            message:
-                'Staff with id ${state.id} already exists in the system. Please use a different id');
-        return;
-      } else {
-        CustomDialog.dismiss();
-        CustomDialog.showInfo(
-            message:
-                'Staff with id ${state.id} already exists but deleted. Do you want to update the staff with this information?',
-            onPressed: () {
-              updateStaff(ref: ref, form: form);
-            },
-            buttonText: 'Yes|Update');
-      }
-    } else {
-      //save user image
-      var image = ref.watch(imageProvider).image;
-      if (image != null) {
-        var folder = await AppUtils.createFolderInAppDocDir('staff');
-        var filename = state.id!.replaceAll(' ', '_');
-        var path = '$folder/$filename.jpg';
-        var file = File(image.path);
-
-        try {
-          await file.rename(path);
-          state = state.copyWith(
-            image: () => path,
-          );
-        } on FileSystemException catch (_) {
-          // if rename fails, copy the source file and then delete it
-          final newFile = await file.copy(path);
-          state = state.copyWith(
-            image: () => newFile.path,
-          );
-          if (ref.watch(imageProvider).isCaptured) {
-            await file.delete();
-          }
-        }
-      }
-      state = state.copyWith(
-        createdAt: () => DateTime.now().millisecondsSinceEpoch,
-        password: () => AppUtils.hashPassword(state.id!),
-      );
-      var (exception, message) = await StaffUsecase(db: db).saveStaff(state);
-      if (exception != null) {
-        CustomDialog.dismiss();
-        CustomDialog.showError(message: exception.toString());
-      } else {
-        ref.invalidate(staffFutureProvider);
-        ref.invalidate(imageProvider);
-        form.currentState!.reset();
-        CustomDialog.dismiss();
-
-        CustomDialog.showSuccess(message: message!);
-      }
-    }
-  }
-
-  void updateStaff(
-      {required WidgetRef ref, required GlobalKey<FormState> form}) async {
-    CustomDialog.dismiss();
-    CustomDialog.showLoading(
-      message: 'Updating Staff.......',
-    );
-    var db = ref.watch(dbProvider);
-    //save user image if it has changed
-    var image = ref.watch(imageProvider).image;
-    if (image != null && image.path != state.image) {
-      var folder = await AppUtils.createFolderInAppDocDir('staff');
-      var filename = state.id!.replaceAll(' ', '_');
-      var path = '$folder/$filename.jpg';
+    var dio = ref.watch(serverProvider);
+    //save user image
+    var image = ref.watch(staffImageProvider).image;
+    if (image != null) {
       var file = File(image.path);
-
-      try {
-        await file.rename(path);
+      var (status, data) = await AppUtils.endCodeimage(
+        image: file,
+      );
+      if (status) {
         state = state.copyWith(
-          image: () => path,
+          image: () => data,
         );
-      } on FileSystemException catch (_) {
-        // if rename fails, copy the source file and then delete it
-        final newFile = await file.copy(path);
-        state = state.copyWith(
-          image: () => newFile.path,
-        );
-        if (ref.watch(imageProvider).isCaptured) {
-          await file.delete();
-        }
+      }
+      // delete image if it was captured
+      if (ref.watch(staffImageProvider).isCaptured) {
+        await file.delete();
       }
     }
     state = state.copyWith(
       createdAt: () => DateTime.now().millisecondsSinceEpoch,
-      isDeleted: false,
-      password: () => AppUtils.hashPassword(state.id!),
+      password: () => state.id!,
     );
-    var (exception, message) =
-        await StaffUsecase(db: db!).updateStaff(state.toMap());
-    if (exception != null) {
+    var (success, data, message) =
+        await StaffUsecase(dio: dio!).saveStaff(state);
+    if (!success) {
       CustomDialog.dismiss();
-      CustomDialog.showError(message: exception.toString());
+      CustomDialog.showError(message: message!);
     } else {
-      ref.invalidate(staffFutureProvider);
-      ref.invalidate(imageProvider);
+      // add data staff to staff provider
+      if (data != null) {
+        ref.read(staffDataProvider.notifier).addStaff(data);
+      }
+      //ref.invalidate(staffFutureProvider);
+      ref.invalidate(staffImageProvider);
       form.currentState!.reset();
       CustomDialog.dismiss();
-      CustomDialog.showSuccess(message: message!);
+      CustomDialog.showSuccess(
+          message: message ?? 'Staff created successfully');
     }
   }
 }
@@ -235,43 +154,40 @@ class SelectedAssistantNotifier extends StateNotifier<StaffModel> {
     CustomDialog.showLoading(
       message: 'Updating Staff.......',
     );
-    var db = ref.watch(dbProvider);
+    var dio = ref.watch(serverProvider);
     //save user image if it has changed
-    var image = ref.watch(imageProvider).image;
-    if (image != null && image.path != state.image) {
-      var folder = await AppUtils.createFolderInAppDocDir('staff');
-      var filename = state.id!.replaceAll(' ', '_');
-      var path = '$folder/$filename.jpg';
+    var image = ref.watch(staffImageProvider).image;
+    if (image != null) {
       var file = File(image.path);
-
-      try {
-        await file.rename(path);
+      var (status, data) = await AppUtils.endCodeimage(
+        image: file,
+      );
+      if (status) {
         state = state.copyWith(
-          image: () => path,
+          image: () => data,
         );
-      } on FileSystemException catch (_) {
-        // if rename fails, copy the source file and then delete it
-        final newFile = await file.copy(path);
-        state = state.copyWith(
-          image: () => newFile.path,
-        );
-        if (ref.watch(imageProvider).isCaptured) {
-          await file.delete();
-        }
+      }
+      // delete image if it was captured
+      if (ref.watch(staffImageProvider).isCaptured) {
+        await file.delete();
       }
     }
 
     //update assistant
-    var (exception, message) =
-        await StaffUsecase(db: db!).updateStaff(state.toMap());
-    if (exception != null) {
+    var (success, data, message) =
+        await StaffUsecase(dio: dio!).updateStaff(state.toMap());
+    if (!success) {
       CustomDialog.dismiss();
-      CustomDialog.showError(message: exception.toString());
+      CustomDialog.showError(message: message!);
     } else {
-      ref.invalidate(staffFutureProvider);
-      ref.invalidate(imageProvider);
+      // update staff provider
+      if (data != null) {
+        ref.read(staffDataProvider.notifier).updateStaff(data);
+      }
+      ref.invalidate(staffImageProvider);
       CustomDialog.dismiss();
-      CustomDialog.showSuccess(message: message!);
+      CustomDialog.showSuccess(
+          message: message ?? 'Staff updated successfully');
       if (!mounted) return;
       context.go(RouterInfo.assistantsRoute.path);
     }
@@ -287,55 +203,60 @@ class SelectedAssistantNotifier extends StateNotifier<StaffModel> {
         await file.delete();
       }
     }
-    var db = ref.watch(dbProvider);
-    var (exception, message) =
-        await StaffUsecase(db: db!).markStaffDeleted(assistant.id!);
-    if (exception != null) {
+    var dio = ref.watch(serverProvider);
+    var (success, data, message) =
+        await StaffUsecase(dio: dio!).markStaffDeleted(assistant.id!);
+    if (!success) {
       CustomDialog.dismiss();
-      CustomDialog.showError(message: exception.toString());
+      CustomDialog.showError(message: message!);
     } else {
-      ref.invalidate(staffFutureProvider);
+      if (data != null) {
+        ref.read(staffDataProvider.notifier).deleteStaff(data.id!);
+      }
       CustomDialog.dismiss();
-      CustomDialog.showSuccess(message: message!);
+      CustomDialog.showSuccess(
+          message: message ?? 'Staff deleted successfully');
     }
   }
 }
 
-final staffProvider = StateNotifierProvider.family<StaffNotifier,
-    TableModel<StaffModel>, List<StaffModel>>((ref, data) {
-  return StaffNotifier(data);
+final staffProvider =
+    StateNotifierProvider<StaffNotifier, TableModel<StaffModel>>((ref) {
+  return StaffNotifier(ref.watch(staffDataProvider));
 });
 
 class StaffNotifier extends StateNotifier<TableModel<StaffModel>> {
-  StaffNotifier(this.items)
+  StaffNotifier(this.staffs)
       : super(TableModel(
           currentPage: 0,
           pageSize: 10,
           selectedRows: [],
           pages: [],
           currentPageItems: [],
-          items: items,
+          items: staffs,
           hasNextPage: false,
           hasPreviousPage: false,
         )) {
     init();
   }
-  final List<StaffModel> items;
+
+  final List<StaffModel> staffs;
 
   void init() {
     List<List<StaffModel>> pages = [];
     state = state.copyWith(
-        items: items,
+        items: staffs,
         selectedRows: [],
         currentPage: 0,
         pages: pages,
         currentPageItems: [],
         hasNextPage: false,
         hasPreviousPage: false);
-    if (items.isNotEmpty) {
-      var pagesCount = (items.length / state.pageSize).ceil();
+    if (state.items.isNotEmpty) {
+      var pagesCount = (state.items.length / state.pageSize).ceil();
       for (var i = 0; i < pagesCount; i++) {
-        var page = items.skip(i * state.pageSize).take(state.pageSize).toList();
+        var page =
+            state.items.skip(i * state.pageSize).take(state.pageSize).toList();
 
         pages.add(page);
         state = state.copyWith(pages: pages);
@@ -356,13 +277,11 @@ class StaffNotifier extends StateNotifier<TableModel<StaffModel>> {
   }
 
   void selectRow(StaffModel row) {
-    state = state
-        .copyWith(selectedRows: [...state.selectedRows, row], items: items);
+    state = state.copyWith(selectedRows: [...state.selectedRows, row]);
   }
 
   void unselectRow(StaffModel row) {
-    state = state.copyWith(
-        selectedRows: [...state.selectedRows..remove(row)], items: items);
+    state = state.copyWith(selectedRows: [...state.selectedRows..remove(row)]);
   }
 
   void nextPage() {
@@ -391,12 +310,13 @@ class StaffNotifier extends StateNotifier<TableModel<StaffModel>> {
     if (query.isEmpty) {
       init();
     } else {
-      var data = items
+      var data = state.items
           .where((element) =>
               element.firstname!.toLowerCase().contains(query.toLowerCase()) ||
               element.surname!.toLowerCase().contains(query.toLowerCase()) ||
               element.email!.toLowerCase().contains(query.toLowerCase()) ||
               element.id!.toLowerCase().contains(query.toLowerCase()) ||
+              element.role!.toLowerCase().contains(query.toLowerCase()) ||
               element.phone!.toLowerCase().contains(query.toLowerCase()))
           .toList();
       List<List<StaffModel>> pages = [];
@@ -429,13 +349,17 @@ class StaffNotifier extends StateNotifier<TableModel<StaffModel>> {
   }
 
   void exportStaff({required String dataLength, required String format}) async {
+     if (state.items.isEmpty) {
+      CustomDialog.showError(message: 'No data to export');
+      return;
+    }
     CustomDialog.showLoading(message: 'Exporting data to excel.......');
 
     var data = ExportData<StaffModel>(
         fileName: dataLength == 'all'
             ? 'all_staffs.$format'
             : 'selected_staffs.$format',
-        data: dataLength != 'all' ? state.currentPageItems : items,
+        data: dataLength != 'all' ? state.currentPageItems : state.items,
         headings: (item) => item.excelHeadings(),
         cellItems: (item) => item.excelData(item));
     if (format == 'pdf') {
@@ -462,16 +386,14 @@ class StaffNotifier extends StateNotifier<TableModel<StaffModel>> {
   }
 }
 
-Future<String> importAssistant(
-    {required WidgetRef ref, required String year}) async {
-  // get db
-  var db = ref.watch(dbProvider);
-  // get settings
-  var response = await StaffUsecase(db: db!).importAssistants(year);
-  if (response) {
-    ref.invalidate(staffFutureProvider);
-    return 'Staff imported successfully';
-  } else {
-    return 'Error importing assistants';
+final staffImageProvider =
+    StateNotifierProvider.autoDispose<ImageProvider, ImagePicked>(
+        (ref) => ImageProvider());
+
+class ImageProvider extends StateNotifier<ImagePicked> {
+  ImageProvider() : super(ImagePicked());
+
+  void setImage({XFile? image, bool isCaptured = false}) {
+    state = state.copyWith(image: image, isCaptured: isCaptured);
   }
 }
