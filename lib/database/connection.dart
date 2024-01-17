@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 
 final serverFuture = FutureProvider((ref) async {
   var dio = Dio(
@@ -33,7 +32,3 @@ final serverProvider = StateProvider<Dio?>((ref) {
 });
 
 
-
-final dbProvider = StateProvider<Db?>((ref) {
-  return null;
-});

@@ -167,15 +167,18 @@ class _NewMessagePageState extends ConsumerState<NewMessagePage> {
                                 width: 20,
                               ),
                               if (filter != null &&
-                                  filter.toLowerCase() != 'all')
+                                  filter.toLowerCase() == 'all')
                                 const Expanded(child: SizedBox()),
                               if (filter != null &&
                                   filter.toLowerCase() == 'by gender')
                                 Expanded(
                                   child: CustomDropDown(
                                     label: 'Select Gender',
-                                    //value: ref.watch(selectedFilterProvider),
+                                    value: ref.watch(selectedFilterProvider),
                                     onChanged: (gender) {
+                                      ref
+                                          .read(selectedFilterProvider.notifier)
+                                          .state = gender.toString();
                                       receipientsNotifier
                                           .filterByGender(gender.toString());
                                     },
@@ -190,8 +193,11 @@ class _NewMessagePageState extends ConsumerState<NewMessagePage> {
                                 Expanded(
                                   child: CustomDropDown(
                                     label: 'Select Level',
-                                    //value: ref.watch(selectedFilterProvider),
+                                    value: ref.watch(selectedFilterProvider),
                                     onChanged: (level) {
+                                      ref
+                                          .read(selectedFilterProvider.notifier)
+                                          .state = level.toString();
                                       receipientsNotifier
                                           .filterByLevel(level.toString());
                                     },
@@ -212,8 +218,11 @@ class _NewMessagePageState extends ConsumerState<NewMessagePage> {
                                 Expanded(
                                   child: CustomDropDown(
                                     label: 'Select Block',
-                                    //value: ref.watch(selectedFilterProvider),
+                                    value: ref.watch(selectedFilterProvider),
                                     onChanged: (block) {
+                                      ref
+                                          .read(selectedFilterProvider.notifier)
+                                          .state = block.toString();
                                       receipientsNotifier
                                           .filterByBlock(block.toString());
                                     },
@@ -227,6 +236,16 @@ class _NewMessagePageState extends ConsumerState<NewMessagePage> {
                                         .map((e) => DropdownMenuItem(
                                             value: e, child: Text(e)))
                                         .toList(),
+                                  ),
+                                ),
+                              if (filter != null &&
+                                  filter.toLowerCase() == 'by room')
+                                Expanded(
+                                  child: CustomTextFields(
+                                    label: 'Enter Room Number',
+                                    onChanged: (room) {
+                                      receipientsNotifier.filterByRoom(room);
+                                    },
                                   ),
                                 ),
                               if (filter != null &&
@@ -435,6 +454,7 @@ class _NewMessagePageState extends ConsumerState<NewMessagePage> {
             children: [
               Expanded(
                 child: CustomTable<StudentModel>(
+                    showPagination: false,
                     header: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 5),
@@ -442,6 +462,8 @@ class _NewMessagePageState extends ConsumerState<NewMessagePage> {
                         //close buttonh
                         IconButton(
                             style: ButtonStyle(
+                                foregroundColor: MaterialStateColor.resolveWith(
+                                    (states) => Colors.white),
                                 backgroundColor:
                                     MaterialStateProperty.all(Colors.red)),
                             onPressed: () {

@@ -9,9 +9,9 @@ import 'package:residency_desktop/features/settings/provider/settings_provider.d
 
 final attendanceFutureProvider =
     FutureProvider.autoDispose<List<AttendanceModel>>((ref) async {
-      var db = ref.watch(dbProvider);
+      var dio = ref.watch(serverProvider);
       var settings = ref.watch(settingsProvider);
-  var data = await AttendanceUseCase(db: db!).getAttendance(settings.academicYear!);
+  var data = await AttendanceUseCase(dio: dio!).getAttendance(settings.academicYear!);
   data.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
   return data;
 });

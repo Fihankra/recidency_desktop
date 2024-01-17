@@ -24,7 +24,8 @@ class CustomTable<TResult extends Object> extends StatefulWidget {
       this.pageSize,
       this.onPageSizeChanged,
       this.onPreviousPage,
-      this.onNextPage});
+      this.onNextPage,
+      this.showPagination = true});
   final List<TResult> data;
   final Widget? header;
   final List<CustomTableColumn<TResult>> columns;
@@ -40,6 +41,7 @@ class CustomTable<TResult extends Object> extends StatefulWidget {
   final VoidCallback? onNextPage;
   final int currentIndex;
   final int? lastIndex;
+  final bool showPagination;
 
   @override
   State<CustomTable<TResult>> createState() => _CustomTableState<TResult>();
@@ -110,8 +112,12 @@ class _CustomTableState<TResult extends Object>
                                   rowsSelectable: widget.rowsSelectable,
                                   rows: widget.rows,
                                 )
-                              :  Center(
-                                  child: Text('No Data Found', style:  Theme.of(context).textTheme.labelLarge,),
+                              : Center(
+                                  child: Text(
+                                    'No Data Found',
+                                    style:
+                                        Theme.of(context).textTheme.labelLarge,
+                                  ),
                                 )),
 
                       if (widget.showColumnHeadersAtFooter)
@@ -129,15 +135,16 @@ class _CustomTableState<TResult extends Object>
             ),
           ),
         )),
-        CustomTableFooter<TResult>(
-          data: widget.data,
-          pageSize: widget.pageSize,
-          onPageSizeChanged: widget.onPageSizeChanged,
-          onPreviousPage: widget.onPreviousPage,
-          onNextPage: widget.onNextPage,
-          currentIndex: widget.currentIndex,
-          lastIndex: widget.lastIndex,
-        ),
+        if (widget.showPagination)
+          CustomTableFooter<TResult>(
+            data: widget.data,
+            pageSize: widget.pageSize,
+            onPageSizeChanged: widget.onPageSizeChanged,
+            onPreviousPage: widget.onPreviousPage,
+            onNextPage: widget.onNextPage,
+            currentIndex: widget.currentIndex,
+            lastIndex: widget.lastIndex,
+          ),
       ]);
     });
   }

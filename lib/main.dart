@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:residency_desktop/config/router/router.dart';
-import 'package:residency_desktop/database/connection.dart';
 import 'package:window_manager/window_manager.dart';
 import 'config/router/provider/theme_provider.dart';
 

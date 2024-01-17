@@ -8,16 +8,17 @@ class MessageUsecase extends MessagesRepository {
     required this.dio,
   });
   @override
-  Future<(bool, MessageModel?, String?)> createMessage(MessageModel message) async {
+  Future<(bool, MessageModel?, String?)> createMessage(
+      MessageModel message) async {
     try {
-      
       var reponds = await dio.post('/messages', data: message.toMap());
       if (reponds.statusCode == 200) {
         if (reponds.data['success']) {
           var data = MessageModel.fromMap(reponds.data['data']);
           return Future.value((true, data, null));
         } else {
-          return Future.value((false, null, reponds.data['message'].toString()));
+          return Future.value(
+              (false, null, reponds.data['message'].toString()));
         }
       } else {
         return Future.value((false, null, reponds.data['message'].toString()));
@@ -30,7 +31,8 @@ class MessageUsecase extends MessagesRepository {
   @override
   Future<List<MessageModel>> getMessages(String accademicYear) async {
     try {
-      var responds = await dio.get('/messages', queryParameters: {"accademicYear": accademicYear});
+      var responds = await dio
+          .get('/messages', queryParameters: {"accademicYear": accademicYear});
       if (responds.statusCode == 200) {
         if (responds.data['success'] == false) {
           return Future.value([]);
@@ -47,6 +49,27 @@ class MessageUsecase extends MessagesRepository {
       }
     } catch (_) {
       return [];
+    }
+  }
+
+  Future<(bool, MessageModel?, String?)> makeAsDeleted(
+      String id, Map<String, dynamic> map) async {
+    try {
+      var responds = await dio.put('/messages/$id', data: map);
+      if (responds.statusCode == 200) {
+        if (responds.data['success']) {
+          var data = MessageModel.fromMap(responds.data['data']);
+          return Future.value((true, data, ''));
+        } else {
+          return Future.value(
+              (false, MessageModel(), responds.data['message'].toString()));
+        }
+      } else {
+        return Future.value(
+            (false, MessageModel(), responds.data['message'].toString()));
+      }
+    } catch (_) {
+      return Future.value((false, MessageModel(), _.toString()));
     }
   }
 }

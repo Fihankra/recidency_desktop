@@ -1,13 +1,16 @@
-import 'package:flutter/src/widgets/form.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_app_file/open_app_file.dart';
 import 'package:residency_desktop/core/data/table_model.dart';
 import 'package:residency_desktop/core/functions/export/export_data.dart';
 import 'package:residency_desktop/core/widgets/custom_dialog.dart';
+import 'package:residency_desktop/database/connection.dart';
 import 'package:residency_desktop/features/messages/data/message_model.dart';
 import 'package:residency_desktop/features/students/data/students_model.dart';
+import 'package:residency_desktop/utils/application_utils.dart';
 import '../../container/provider/main_provider.dart';
+import '../../settings/provider/settings_provider.dart';
+import '../usecases/message_usecase.dart';
 
 final messageProvider =
     StateNotifierProvider<MessageProvider, TableModel<MessageModel>>((ref) {
@@ -182,9 +185,15 @@ class NewMessageProvider extends StateNotifier<MessageModel> {
           recipients: [],
         ));
 
-  void setSender(String? sender) {}
+  void setSender(String? sender) {
+    state = state.copyWith(
+        senderId: () =>
+            sender != null ? sender.toUpperCase() : 'Autonomy'.toUpperCase());
+  }
 
-  void setMessage(String? message) {}
+  void setMessage(String? message) {
+    state = state.copyWith(message: () => message);
+  }
 
   void setRecipients(List<StudentModel> filter, WidgetRef ref) {
     //convert to list of map
@@ -193,7 +202,6 @@ class NewMessageProvider extends StateNotifier<MessageModel> {
       recipients.add(item.toMap());
     }
     state = state.copyWith(recipients: () => recipients);
-    print('filer ${filter.length}');
     ref.read(selectedReceipientProvider.notifier).state = filter;
   }
 
@@ -221,7 +229,6 @@ class NewMessageProvider extends StateNotifier<MessageModel> {
       for (var item in filter) {
         data.add(StudentModel.fromMap(item));
       }
-      print('data length ${data.length}');
       ref.read(selectedReceipientProvider.notifier).state = data;
     }
   }
@@ -238,7 +245,38 @@ class NewMessageProvider extends StateNotifier<MessageModel> {
     ref.read(selectedReceipientProvider.notifier).state = data;
   }
 
-  void send(WidgetRef ref, BuildContext context, GlobalKey<FormState> formKey) {}
+  void send(
+      WidgetRef ref, BuildContext context, GlobalKey<FormState> formKey) async {
+    CustomDialog.dismiss();
+    if (state.recipients == null || state.recipients!.isEmpty) {
+      CustomDialog.showError(message: 'Please select at least one recipient');
+      return;
+    }
+    CustomDialog.showLoading(message: 'Sending message.......');
+    var settings = ref.read(settingsProvider);
+    var dio = ref.read(serverProvider);
+    state = state.copyWith(
+        createdAt: () => DateTime.now().toUtc().millisecondsSinceEpoch,
+        accademicYear: () => settings.academicYear,
+        id: () => AppUtils.getId(),
+        status: () => 'pending');
+    var (success, data, message) =
+        await MessageUsecase(dio: dio!).createMessage(state);
+
+    if (success) {
+      CustomDialog.dismiss();
+      if (data != null) {
+        CustomDialog.showSuccess(
+            message: message ?? 'Message sent successfully');
+        ref.read(messageDataProvider.notifier).addMessage(data);
+      } else {
+        CustomDialog.showError(message: message ?? 'An error occured');
+      }
+    } else {
+      CustomDialog.dismiss();
+      CustomDialog.showError(message: message ?? 'An error occured');
+    }
+  }
 }
 
 final messageReceipeintProvider = StateNotifierProvider.family
@@ -270,6 +308,13 @@ class MessageReceipeintProvider extends StateNotifier<List<StudentModel>> {
     var filter = items.where((element) => element.id == value.id).toList();
     ref.read(newMessageProvider.notifier).setRecipients(filter, ref);
   }
+
+  void filterByRoom(String room) {
+    var filter = items
+        .where((element) => element.room!.toLowerCase() == room.toLowerCase())
+        .toList();
+    ref.read(newMessageProvider.notifier).setRecipients(filter, ref);
+  }
 }
 
 final messageReceipeintFilterProvider =
@@ -278,5 +323,34 @@ final messageReceipeintFilterProvider =
 final selectedReceipientProvider =
     StateProvider<List<StudentModel>>((ref) => []);
 
-
 final selectedFilterProvider = StateProvider<String?>((ref) => null);
+
+final selectedMessageProvider =
+    StateNotifierProvider<SelectedMessageProvider, MessageModel>(
+        (ref) => SelectedMessageProvider());
+
+class SelectedMessageProvider extends StateNotifier<MessageModel> {
+  SelectedMessageProvider() : super(MessageModel());
+
+  void deleteMessage(WidgetRef ref, MessageModel selected) async {
+    CustomDialog.showLoading(message: 'Deleting message.......');
+    var dio = ref.read(serverProvider);
+    var (success, data, message) = await MessageUsecase(dio: dio!)
+        .makeAsDeleted(selected.id!, {'isDeleted': true});
+    if (success) {
+      CustomDialog.dismiss();
+      if (data != null) {
+        ref.read(messageDataProvider.notifier).deleteMessage(data.id!);
+        CustomDialog.showSuccess(
+            message: message != null && message.isNotEmpty
+                ? message
+                : 'Message deleted successfully');
+      } else {
+        CustomDialog.showError(message: message ?? 'An error occured');
+      }
+    } else {
+      CustomDialog.dismiss();
+      CustomDialog.showError(message: message ?? 'An error occured');
+    }
+  }
+}

@@ -264,13 +264,22 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
                 ),
               ),
               CustomTableColumn(
-                title: 'Status',
-                width: 150,
-                cellBuilder: (message) => Text(
-                  message.status ?? '',
-                  style: tableTextStyle,
-                ),
-              ),
+                  title: 'Status',
+                  width: 150,
+                  cellBuilder: (message) {
+                    return Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: message.status!.toLowerCase() == 'pending'
+                              ? Colors.black45
+                              : message.status!.toLowerCase() == 'success'
+                                  ? Colors.green
+                                  : Colors.red,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(message.status ?? ''));
+                  }),
               CustomTableColumn(
                 title: 'Total Recipients',
                 width: 150,
@@ -292,6 +301,20 @@ class _MessagesPageState extends ConsumerState<MessagesPage> {
                 cellBuilder: (message) => Text(
                   DateTimeAction.getDateTime(message.createdAt!),
                   style: tableTextStyle,
+                ),
+              ),
+              //action to mark as deleted
+              CustomTableColumn(
+                title: 'Action',
+                width: 150,
+                cellBuilder: (message) => IconButton(
+                  onPressed: () {
+                    ref.read(selectedMessageProvider.notifier).deleteMessage(ref,message);
+                  },
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
                 ),
               ),
             ])),

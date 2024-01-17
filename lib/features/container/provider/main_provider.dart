@@ -48,6 +48,7 @@ final mainProvider = FutureProvider<void>((ref) async {
   //? get all massages
   var messages = await MessageUsecase(dio: dio).getMessages(settings.academicYear!);
   messages.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+  ref.read(messageDataProvider.notifier).setMessages(messages);
   //? get all keyLogs
   var keyLogs =
       await KeyFlowUseCase(dio: dio).getKeyFlows(settings.academicYear!);

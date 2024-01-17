@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../core/functions/date_time.dart';
 
 class MessageModel {
   String? id;
@@ -17,7 +18,7 @@ class MessageModel {
     this.id,
     this.senderId,
     this.message,
-     this.isDeleted=false,
+    this.isDeleted = false,
     this.status,
     this.recipients,
     this.responseData,
@@ -44,7 +45,8 @@ class MessageModel {
       status: status != null ? status() : this.status,
       recipients: recipients != null ? recipients() : this.recipients,
       responseData: responseData != null ? responseData() : this.responseData,
-      accademicYear: accademicYear != null ? accademicYear() : this.accademicYear,
+      accademicYear:
+          accademicYear != null ? accademicYear() : this.accademicYear,
       createdAt: createdAt != null ? createdAt() : this.createdAt,
     );
   }
@@ -70,8 +72,12 @@ class MessageModel {
       message: map['message'],
       isDeleted: map['isDeleted'] ?? false,
       status: map['status'],
-      recipients: map['recipients'] != null ? List<Map<String, dynamic>>.from(map['recipients']?.map((x) => x)) : null,
-      responseData: map['responseData'] != null ? List<Map<String, dynamic>>.from(map['responseData']?.map((x) => x)) : null,
+      recipients: map['recipients'] != null
+          ? List<Map<String, dynamic>>.from(map['recipients']?.map((x) => x))
+          : null,
+      responseData: map['responseData'] != null
+          ? List<Map<String, dynamic>>.from(map['responseData']?.map((x) => x))
+          : null,
       accademicYear: map['accademicYear'],
       createdAt: map['createdAt']?.toInt(),
     );
@@ -90,33 +96,33 @@ class MessageModel {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-  
+
     return other is MessageModel &&
-      other.id == id &&
-      other.senderId == senderId &&
-      other.message == message &&
-      other.isDeleted == isDeleted &&
-      other.status == status &&
-      listEquals(other.recipients, recipients) &&
-      listEquals(other.responseData, responseData) &&
-      other.accademicYear == accademicYear &&
-      other.createdAt == createdAt;
+        other.id == id &&
+        other.senderId == senderId &&
+        other.message == message &&
+        other.isDeleted == isDeleted &&
+        other.status == status &&
+        listEquals(other.recipients, recipients) &&
+        listEquals(other.responseData, responseData) &&
+        other.accademicYear == accademicYear &&
+        other.createdAt == createdAt;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-      senderId.hashCode ^
-      message.hashCode ^
-      isDeleted.hashCode ^
-      status.hashCode ^
-      recipients.hashCode ^
-      responseData.hashCode ^
-      accademicYear.hashCode ^
-      createdAt.hashCode;
+        senderId.hashCode ^
+        message.hashCode ^
+        isDeleted.hashCode ^
+        status.hashCode ^
+        recipients.hashCode ^
+        responseData.hashCode ^
+        accademicYear.hashCode ^
+        createdAt.hashCode;
   }
 
-  excelHeadings() {
+  List<String> excelHeadings() {
     return [
       'id',
       'senderId',
@@ -127,14 +133,14 @@ class MessageModel {
     ];
   }
 
-  excelData(MessageModel item) {
+  List<String> excelData(MessageModel item) {
     return [
-      item.id,
-      item.senderId,
-      item.message,
-      item.status,
-      item.accademicYear,
-      item.createdAt,
+      item.id ?? '',
+      item.senderId ?? '',
+      item.message ?? '',
+      item.status ?? '',
+      item.accademicYear ?? '',
+      item.createdAt != null ? DateTimeAction.getDateTime(item.createdAt!) : ''
     ];
   }
 }

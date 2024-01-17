@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:image_compression_flutter/image_compression_flutter.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:uuid/uuid.dart';
 
 class AppUtils {
   static Future<(bool, String?)> endCodeimage({required File image}) async {
