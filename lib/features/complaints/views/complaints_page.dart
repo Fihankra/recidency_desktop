@@ -66,154 +66,155 @@ class _ComplaintsPageState extends ConsumerState<ComplaintsPage> {
                   const SizedBox(
                     width: 25,
                   ),
-                  PopupMenuButton(
-                    itemBuilder: (context) {
-                      return [
-                        PopupMenuItem(
-                          value: 'pdf',
-                          child: PopupMenuButton<int>(
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: 1,
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.all_inbox),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text("All Data")
-                                  ],
+                  if (me.role == Role.hallAdmin)
+                    PopupMenuButton(
+                      itemBuilder: (context) {
+                        return [
+                          PopupMenuItem(
+                            value: 'pdf',
+                            child: PopupMenuButton<int>(
+                              itemBuilder: (context) => [
+                                const PopupMenuItem(
+                                  value: 1,
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.all_inbox),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text("All Data")
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              // popupmenu item 2
-                              const PopupMenuItem(
-                                value: 2,
-                                // row has two child icon and text
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.table_rows),
-                                    SizedBox(
-                                      // sized box with width 10
-                                      width: 10,
-                                    ),
-                                    Text("Table Content")
-                                  ],
+                                // popupmenu item 2
+                                const PopupMenuItem(
+                                  value: 2,
+                                  // row has two child icon and text
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.table_rows),
+                                      SizedBox(
+                                        // sized box with width 10
+                                        width: 10,
+                                      ),
+                                      Text("Table Content")
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                            elevation: 2,
-                            child: const Row(
-                              children: [
-                                Icon(FontAwesomeIcons.filePdf),
-                                SizedBox(width: 5),
-                                Text('Export as PDF'),
                               ],
+                              elevation: 2,
+                              child: const Row(
+                                children: [
+                                  Icon(FontAwesomeIcons.filePdf),
+                                  SizedBox(width: 5),
+                                  Text('Export as PDF'),
+                                ],
+                              ),
+                              onSelected: (value) {
+                                if (value == 1) {
+                                  complaintsNotifier.exportComplaints(
+                                    dataLength: 'all',
+                                    format: 'pdf',
+                                  );
+                                } else {
+                                  complaintsNotifier.exportComplaints(
+                                    dataLength: 'table',
+                                    format: 'pdf',
+                                  );
+                                }
+                              },
                             ),
-                            onSelected: (value) {
-                              if (value == 1) {
-                                complaintsNotifier.exportComplaints(
-                                  dataLength: 'all',
-                                  format: 'pdf',
-                                );
-                              } else {
-                                complaintsNotifier.exportComplaints(
-                                  dataLength: 'table',
-                                  format: 'pdf',
-                                );
-                              }
-                            },
                           ),
-                        ),
-                        const PopupMenuItem(
-                          height: 2,
-                          enabled: false,
-                          child: Divider(
-                            color: primaryColor,
-                            thickness: 2,
+                          const PopupMenuItem(
+                            height: 2,
+                            enabled: false,
+                            child: Divider(
+                              color: primaryColor,
+                              thickness: 2,
+                            ),
                           ),
-                        ),
-                        PopupMenuItem(
-                          value: 'excel',
-                          child: PopupMenuButton<int>(
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: 1,
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.all_inbox),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text("All Data")
-                                  ],
+                          PopupMenuItem(
+                            value: 'excel',
+                            child: PopupMenuButton<int>(
+                              itemBuilder: (context) => [
+                                const PopupMenuItem(
+                                  value: 1,
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.all_inbox),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text("All Data")
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              // popupmenu item 2
-                              const PopupMenuItem(
-                                value: 2,
-                                // row has two child icon and text
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.table_rows),
-                                    SizedBox(
-                                      // sized box with width 10
-                                      width: 10,
-                                    ),
-                                    Text("Table Content")
-                                  ],
+                                // popupmenu item 2
+                                const PopupMenuItem(
+                                  value: 2,
+                                  // row has two child icon and text
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.table_rows),
+                                      SizedBox(
+                                        // sized box with width 10
+                                        width: 10,
+                                      ),
+                                      Text("Table Content")
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                            elevation: 2,
-                            child: const Row(
-                              children: [
-                                Icon(FontAwesomeIcons.fileExcel),
-                                SizedBox(width: 5),
-                                Text('Export as Excel'),
                               ],
+                              elevation: 2,
+                              child: const Row(
+                                children: [
+                                  Icon(FontAwesomeIcons.fileExcel),
+                                  SizedBox(width: 5),
+                                  Text('Export as Excel'),
+                                ],
+                              ),
+                              onSelected: (value) {
+                                if (value == 1) {
+                                  complaintsNotifier.exportComplaints(
+                                    dataLength: 'all',
+                                    format: 'xlsx',
+                                  );
+                                } else {
+                                  complaintsNotifier.exportComplaints(
+                                    dataLength: 'table',
+                                    format: 'xlsx',
+                                  );
+                                }
+                              },
                             ),
-                            onSelected: (value) {
-                              if (value == 1) {
-                                complaintsNotifier.exportComplaints(
-                                  dataLength: 'all',
-                                  format: 'xlsx',
-                                );
-                              } else {
-                                complaintsNotifier.exportComplaints(
-                                  dataLength: 'table',
-                                  format: 'xlsx',
-                                );
-                              }
-                            },
                           ),
+                        ];
+                      },
+                      onSelected: (value) {},
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 25),
+                        decoration: BoxDecoration(
+                          color: secondaryColor,
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(color: primaryColor),
                         ),
-                      ];
-                    },
-                    onSelected: (value) {},
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 25),
-                      decoration: BoxDecoration(
-                        color: secondaryColor,
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: primaryColor),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            MdiIcons.export,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 5),
-                          const Text(
-                            'Export',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
+                        child: Row(
+                          children: [
+                            Icon(
+                              MdiIcons.export,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 5),
+                            const Text(
+                              'Export',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
                 ]),
                 currentIndex: complaintsData.currentPageItems.isNotEmpty
                     ? complaintsData.items

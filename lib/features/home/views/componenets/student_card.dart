@@ -10,10 +10,10 @@ import 'package:residency_desktop/features/students/data/students_model.dart';
 import 'package:residency_desktop/generated/assets.dart';
 
 class StudentCard extends ConsumerStatefulWidget {
-  const StudentCard(this.student, this.keyLog, {super.key});
+  const StudentCard({required this.student, this.keyLog, super.key,  this. controller});
   final StudentModel student;
   final KeyLogModel? keyLog;
-
+  final TextEditingController? controller;
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _StudentCardState();
 }
@@ -24,6 +24,7 @@ class _StudentCardState extends ConsumerState<StudentCard> {
   @override
   Widget build(BuildContext context) {
     var me = ref.read(myselfProvider);
+
     return InkWell(
         onTap: () {},
         onHover: (value) {
@@ -34,7 +35,8 @@ class _StudentCardState extends ConsumerState<StudentCard> {
         child: me.role != Role.hallAdmin
             ? PopupMenuButton(
                 itemBuilder: (context) => [
-                      if (widget.keyLog == null ||
+                      if ((widget.keyLog == null ||
+                              widget.keyLog!.id == null) ||
                           widget.keyLog!.activity == 'in')
                         PopupMenuItem(
                           child: ListTile(
@@ -51,7 +53,8 @@ class _StudentCardState extends ConsumerState<StudentCard> {
                             },
                           ),
                         ),
-                      if (widget.keyLog == null ||
+                      if ((widget.keyLog == null ||
+                              widget.keyLog!.id == null) ||
                           widget.keyLog!.activity == 'out')
                         PopupMenuItem(
                           child: ListTile(
@@ -64,6 +67,7 @@ class _StudentCardState extends ConsumerState<StudentCard> {
                                   .addKeyActivity(
                                       student: widget.student,
                                       activity: 'in',
+                                      controller: widget.controller,
                                       ref: ref);
                             },
                           ),
@@ -97,7 +101,8 @@ class _StudentCardState extends ConsumerState<StudentCard> {
                             image: MemoryImage(
                                 base64Decode(widget.student.image!)),
                             fit: BoxFit.cover)
-                        :const DecorationImage (image: AssetImage(Assets.imagesImageP),
+                        : const DecorationImage(
+                            image: AssetImage(Assets.imagesImageP),
                             fit: BoxFit.cover),
                     borderRadius: BorderRadius.circular(10)),
               ),

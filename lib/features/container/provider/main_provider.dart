@@ -8,6 +8,8 @@ import 'package:residency_desktop/features/staffs/usecase/staff_usecases.dart';
 import 'package:residency_desktop/features/students/data/students_model.dart';
 import '../../auth/provider/mysefl_provider.dart';
 import '../../complaints/usecase/complaints_usecase.dart';
+import '../../dashboard/data/attendance_model.dart';
+import '../../dashboard/usecase/attendance_usecase.dart';
 import '../../keyFlow/usecase/key_flow_usecase.dart';
 import '../../messages/usecases/message_usecase.dart';
 import '../../settings/provider/settings_provider.dart';
@@ -54,8 +56,17 @@ final mainProvider = FutureProvider<void>((ref) async {
       await KeyFlowUseCase(dio: dio).getKeyFlows(settings.academicYear!);
   keyLogs.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
   ref.read(keyLogDataProvider.notifier).setLogs(keyLogs);
+  //? get all attendance
+  var attendance =
+      await AttendanceUseCase(dio: dio).getAttendance(settings.academicYear!);
+  attendance.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+  ref.read(attendanceDataProvider.notifier).setAttendance(attendance);
 });
 
+
+final attendanceDataProvider =
+    StateNotifierProvider<AttendanceProvider, List<AttendanceModel>>(
+        (ref) => AttendanceProvider());
 final staffDataProvider =
     StateNotifierProvider<StaffDataProvider, List<StaffModel>>(
         (ref) => StaffDataProvider());
@@ -179,5 +190,18 @@ class MessageProvider extends StateNotifier<List<MessageModel>>{
       if(item.id != id) item
     ];
   }
+
+}
+
+class AttendanceProvider extends StateNotifier<List<AttendanceModel>> {
+  AttendanceProvider() : super([]);
+  void setAttendance(List<AttendanceModel> attendance) {
+    state = attendance;
+  }
+
+  void addAttendance(AttendanceModel attendance) {
+    state = [...state, attendance];
+  }
+
 
 }

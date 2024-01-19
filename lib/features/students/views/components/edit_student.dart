@@ -10,7 +10,6 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:residency_desktop/config/router/router_info.dart';
 import 'package:residency_desktop/config/theme/theme.dart';
 import 'package:residency_desktop/core/constants/departments.dart';
-import 'package:residency_desktop/core/provider/image_provider.dart';
 import 'package:residency_desktop/core/widgets/components/page_headers.dart';
 import 'package:residency_desktop/core/widgets/custom_button.dart';
 import 'package:residency_desktop/core/widgets/custom_drop_down.dart';

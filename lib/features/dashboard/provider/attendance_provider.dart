@@ -1,24 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:residency_desktop/core/data/table_model.dart';
-import 'package:residency_desktop/database/connection.dart';
 import 'package:residency_desktop/features/dashboard/data/attendance_model.dart';
-import 'package:residency_desktop/features/dashboard/usecase/attendance_usecase.dart';
-import 'package:residency_desktop/features/settings/provider/settings_provider.dart';
+import '../../container/provider/main_provider.dart';
 
 
-final attendanceFutureProvider =
-    FutureProvider.autoDispose<List<AttendanceModel>>((ref) async {
-      var dio = ref.watch(serverProvider);
-      var settings = ref.watch(settingsProvider);
-  var data = await AttendanceUseCase(dio: dio!).getAttendance(settings.academicYear!);
-  data.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
-  return data;
-});
 
 final todayAttendanceProvider =
-    StateProvider.family<List<AttendanceModel>, List<AttendanceModel>>(
-        (ref, list) {
+    StateProvider<List<AttendanceModel>>(
+        (ref) {
+          var list = ref.watch(attendanceDataProvider);
   var today = DateTime.now();
   var todayAttendance = list
       .where(
@@ -27,9 +18,9 @@ final todayAttendanceProvider =
   return todayAttendance;
 });
 
-final attendanceProvider = StateNotifierProvider.family<AttendanceNotifer,
-    TableModel<AttendanceModel>, List<AttendanceModel>>((ref, list) {
-  return AttendanceNotifer(list);
+final attendanceProvider = StateNotifierProvider<AttendanceNotifer,
+    TableModel<AttendanceModel>>((ref) {
+  return AttendanceNotifer(ref.watch(attendanceDataProvider));
 });
 
 class AttendanceNotifer extends StateNotifier<TableModel<AttendanceModel>> {

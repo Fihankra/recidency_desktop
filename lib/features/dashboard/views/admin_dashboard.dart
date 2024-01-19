@@ -25,7 +25,13 @@ class AdminDashboard extends ConsumerStatefulWidget {
 class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
-    var attendancesData = ref.watch(attendanceFutureProvider);
+    var todayAttendance = ref.watch(todayAttendanceProvider);
+    //limit to 10
+    todayAttendance = todayAttendance.length > 10
+        ? todayAttendance.sublist(0, 10)
+        : todayAttendance;
+    var tableTextStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
+        fontFamily: 'openSans', fontSize: 14, fontWeight: FontWeight.w500);
     return Container(
         padding: const EdgeInsets.all(8),
         child: Column(children: [
@@ -70,17 +76,15 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                             icon: MdiIcons.accountGroup,
                             color: Colors.green,
                           ),
-                        
-                               DashBoardCard(
-                                title: 'Complaints',
-                                value: ref
-                                    .watch(complaintDataProvider)
-                                    .length
-                                    .toString(),
-                                icon: FontAwesomeIcons.listCheck,
-                                color: Colors.red,
-                              )
-                          
+                          DashBoardCard(
+                            title: 'Complaints',
+                            value: ref
+                                .watch(complaintDataProvider)
+                                .length
+                                .toString(),
+                            icon: FontAwesomeIcons.listCheck,
+                            color: Colors.red,
+                          )
                         ],
                       ),
                     ),
@@ -112,15 +116,8 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                       ],
                     ),
                     subtitle: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: attendancesData.when(data: (data) {
-                        var todayAttendance =
-                            ref.watch(todayAttendanceProvider(data));
-                        //limit to 10
-                        todayAttendance = todayAttendance.length > 10
-                            ? todayAttendance.sublist(0, 10)
-                            : todayAttendance;
-                        return SizedBox(
+                        padding: const EdgeInsets.all(10.0),
+                        child: SizedBox(
                           height: 500,
                           child: CustomTable<AttendanceModel>(
                               data: todayAttendance,
@@ -136,16 +133,19 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                                 CustomTableColumn(
                                     title: 'ID',
                                     width: 120,
-                                    cellBuilder: (attendance) =>
-                                        Text(attendance.id ?? '')),
+                                    cellBuilder: (attendance) => Text(
+                                        attendance.id ?? '',
+                                        style: tableTextStyle)),
                                 CustomTableColumn(
                                     title: 'Assistant ID',
-                                    cellBuilder: (attendance) =>
-                                        Text(attendance.assistantId ?? '')),
+                                    cellBuilder: (attendance) => Text(
+                                        attendance.assistantId ?? '',
+                                        style: tableTextStyle)),
                                 CustomTableColumn(
                                     title: 'Assistant Name',
-                                    cellBuilder: (attendance) =>
-                                        Text(attendance.assistantName ?? '')),
+                                    cellBuilder: (attendance) => Text(
+                                        attendance.assistantName ?? '',
+                                        style: tableTextStyle)),
                                 CustomTableColumn(
                                     title: 'Action',
                                     cellBuilder: (attendance) => Row(
@@ -177,24 +177,16 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                                         )),
                                 CustomTableColumn(
                                     title: 'Date',
-                                    cellBuilder: (attendance) =>
-                                        Text(attendance.date ?? '')),
+                                    cellBuilder: (attendance) => Text(
+                                        attendance.date ?? '',
+                                        style: tableTextStyle)),
                                 CustomTableColumn(
                                     title: 'Time',
-                                    cellBuilder: (attendance) =>
-                                        Text(attendance.time ?? '')),
+                                    cellBuilder: (attendance) => Text(
+                                        attendance.time ?? '',
+                                        style: tableTextStyle)),
                               ]),
-                        );
-                      }, error: (error, stack) {
-                        return const Center(
-                          child: Text('Something went wrong'),
-                        );
-                      }, loading: () {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }),
-                    ),
+                        )),
                   )
                 ],
               ),

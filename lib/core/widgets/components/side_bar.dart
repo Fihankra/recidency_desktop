@@ -193,7 +193,7 @@ class _SideBarState extends ConsumerState<SideBar> {
                         message: 'Are you sure you want to logout?',
                         buttonText: 'Logout',
                         onPressed: () {
-                          ref.watch(myselfProvider.notifier).logout(context);
+                          ref.read(myselfProvider.notifier).logout(context,ref);
                         },
                       );
                     },

@@ -231,13 +231,12 @@ class StudentModel {
     String femaleImage = 'https://xsgames.co/randomusers/avatar.php?g=female';
     var blk = ['Block A', 'Block B', 'Block C', 'Block D', 'Annex'];
     for (var block in blk) {
-      print(
-          '$block=================================================================');
+  
       var lastChar = block.trim().substring(block.length - 1);
       for (int i = 0; i < 20; i++) {
-        print("\t Room ${i + 1}");
+       
         for (int x = 0; x < 4; x++) {
-          print("\t\t Student ${x + 1}");
+          
           var room = lastChar != 'x'
               ? '${lastChar.toUpperCase()}${i + 1}'
               : 'AA${i + 1}';
@@ -288,7 +287,7 @@ class StudentModel {
           }
         }
       }
-      print('done--------------------------------------------');
+
     }
 
     return Future.value(list);

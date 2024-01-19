@@ -24,7 +24,7 @@ class NewStaffNotifier extends StateNotifier<StaffModel> {
   NewStaffNotifier() : super(StaffModel());
 
   void setStaffId(String s) {
-    state = state.copyWith(id: () => s);
+    state = state.copyWith(id: () => s.toUpperCase());
   }
 
   void setGender(String gender) {
@@ -349,7 +349,7 @@ class StaffNotifier extends StateNotifier<TableModel<StaffModel>> {
   }
 
   void exportStaff({required String dataLength, required String format}) async {
-     if (state.items.isEmpty) {
+    if (state.items.isEmpty) {
       CustomDialog.showError(message: 'No data to export');
       return;
     }

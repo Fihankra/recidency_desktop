@@ -23,7 +23,10 @@ class AttendancePage extends ConsumerStatefulWidget {
 class _AttendancePageState extends ConsumerState<AttendancePage> {
   @override
   Widget build(BuildContext context) {
-    var attendancesData = ref.watch(attendanceFutureProvider);
+    var attendanceData = ref.watch(attendanceProvider);
+    var attendanceNotifier = ref.read(attendanceProvider.notifier);
+    var tableTextStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
+        fontFamily: 'openSans', fontSize: 14, fontWeight: FontWeight.w500);
     return Container(
         padding: const EdgeInsets.all(15),
         child: Column(children: [
@@ -40,11 +43,7 @@ class _AttendancePageState extends ConsumerState<AttendancePage> {
             height: 10,
           ),
           Expanded(
-            child: attendancesData.when(data: (data) {
-              var attendanceData = ref.watch(attendanceProvider(data));
-              var attendanceNotifier =
-                  ref.read(attendanceProvider(data).notifier);
-              return CustomTable<AttendanceModel>(
+              child: CustomTable<AttendanceModel>(
                   header: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -64,6 +63,10 @@ class _AttendancePageState extends ConsumerState<AttendancePage> {
                                       text: 'Filtered by: ',
                                       style: getTextStyle(
                                           fontSize: 14,
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge!
+                                              .color!,
                                           fontWeight: FontWeight.w400),
                                       children: [
                                     TextSpan(
@@ -88,12 +91,11 @@ class _AttendancePageState extends ConsumerState<AttendancePage> {
                                     width: 40,
                                     height: 40,
                                     decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        ),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
                                     child: const Center(
                                         child: Icon(
                                       Icons.close,
-                                      
                                     )),
                                   )),
                                 ),
@@ -129,96 +131,94 @@ class _AttendancePageState extends ConsumerState<AttendancePage> {
                             ]),
                           ),
                           const SizedBox(width: 15),
-                         
-                            SizedBox(
-                              width: 500,
-                              child: CustomTextFields(
-                                hintText: 'Search for assistant name',
-                                suffixIcon: IconButton(
-                                    icon: const Icon(Icons.close),
-                                    onPressed: () {
-                                      ref
-                                          .read(isAttendanceSearchingProvider
-                                              .notifier)
-                                          .state = false;
-                                    }),
-                                onChanged: (query) {
-                                  attendanceNotifier.search(query);
-                                },
-                              ),
+
+                          SizedBox(
+                            width: 500,
+                            child: CustomTextFields(
+                              hintText: 'Search for assistant name',
+                              suffixIcon: IconButton(
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () {
+                                    ref
+                                        .read(isAttendanceSearchingProvider
+                                            .notifier)
+                                        .state = false;
+                                  }),
+                              onChanged: (query) {
+                                attendanceNotifier.search(query);
+                              },
                             ),
+                          ),
+                          const SizedBox(width: 15),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              
-                                PopupMenuButton(
-                                  
-                                  itemBuilder: (context) {
-                                    return [
-                                      const PopupMenuItem(
-                                        value: 'pdf',
-                                        child: Row(
-                                          children: [
-                                            Icon(FontAwesomeIcons.filePdf),
-                                            SizedBox(width: 5),
-                                            Text('Export as PDF'),
-                                          ],
-                                        ),
+                              PopupMenuButton(
+                                itemBuilder: (context) {
+                                  return [
+                                    const PopupMenuItem(
+                                      value: 'pdf',
+                                      child: Row(
+                                        children: [
+                                          Icon(FontAwesomeIcons.filePdf),
+                                          SizedBox(width: 5),
+                                          Text('Export as PDF'),
+                                        ],
                                       ),
-                                      const PopupMenuItem(
-                                        height: 2,
-                                        enabled: false,
-                                        child: Divider(
-                                          color: primaryColor,
-                                          thickness: 2,
-                                        ),
+                                    ),
+                                    const PopupMenuItem(
+                                      height: 2,
+                                      enabled: false,
+                                      child: Divider(
+                                        color: primaryColor,
+                                        thickness: 2,
                                       ),
-                                      const PopupMenuItem(
-                                        value: 'excel',
-                                        child: Row(
-                                          children: [
-                                            Icon(FontAwesomeIcons.fileExcel),
-                                            SizedBox(width: 5),
-                                            Text('Export as Excel'),
-                                          ],
-                                        ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'excel',
+                                      child: Row(
+                                        children: [
+                                          Icon(FontAwesomeIcons.fileExcel),
+                                          SizedBox(width: 5),
+                                          Text('Export as Excel'),
+                                        ],
                                       ),
-                                    ];
-                                  },
-                                  onSelected: (value) {},
-                                  child:Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 10, horizontal: 15),
-                                          decoration: BoxDecoration(
-                                            color: secondaryColor,
-                                            borderRadius:
-                                                BorderRadius.circular(5),
-                                            border:
-                                                Border.all(color: primaryColor),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                MdiIcons.export,
-                                                color: Colors.white,
-                                                size: 18,
-                                              ),
-                                              const SizedBox(width: 5),
-                                              const Text(
-                                                'Export',
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                    ),
+                                  ];
+                                },
+                                onSelected: (value) {},
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 15),
+                                  decoration: BoxDecoration(
+                                    color: secondaryColor,
+                                    borderRadius: BorderRadius.circular(5),
+                                    border: Border.all(color: primaryColor),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        MdiIcons.export,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      const Text(
+                                        'Export',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                              ),
                             ],
                           ),
                         ]),
                   ),
                   currentIndex: attendanceData.currentPageItems.isNotEmpty
-                      ? data.indexOf(attendanceData.currentPageItems[0]) + 1
+                      ? attendanceData.items
+                              .indexOf(attendanceData.currentPageItems[0]) +
+                          1
                       : 0,
                   lastIndex: attendanceData.pageSize *
                       (attendanceData.currentPage + 1),
@@ -249,20 +249,23 @@ class _AttendancePageState extends ConsumerState<AttendancePage> {
                       )
                   ],
                   showColumnHeadersAtFooter: true,
-                  data: data,
+                  data: attendanceData.items,
                   columns: [
                     CustomTableColumn(
                         title: 'ID',
                         // width: 120,
-                        cellBuilder: (attendance) => Text(attendance.id ?? '')),
+                        cellBuilder: (attendance) =>
+                            Text(attendance.id ?? '', style: tableTextStyle)),
                     CustomTableColumn(
                         title: 'Assistant ID',
-                        cellBuilder: (attendance) =>
-                            Text(attendance.assistantId ?? '')),
+                        cellBuilder: (attendance) => Text(
+                            attendance.assistantId ?? '',
+                            style: tableTextStyle)),
                     CustomTableColumn(
                         title: 'Assistant Name',
-                        cellBuilder: (attendance) =>
-                            Text(attendance.assistantName ?? '')),
+                        cellBuilder: (attendance) => Text(
+                            attendance.assistantName ?? '',
+                            style: tableTextStyle)),
                     CustomTableColumn(
                         title: 'Action',
                         cellBuilder: (attendance) => Row(
@@ -295,18 +298,12 @@ class _AttendancePageState extends ConsumerState<AttendancePage> {
                     CustomTableColumn(
                         title: 'Date',
                         cellBuilder: (attendance) =>
-                            Text(attendance.date ?? '')),
+                            Text(attendance.date ?? '', style: tableTextStyle)),
                     CustomTableColumn(
                         title: 'Time',
                         cellBuilder: (attendance) =>
-                            Text(attendance.time ?? '')),
-                  ]);
-            }, error: (error, stack) {
-              return const Center(child: Text('Something went wrong'));
-            }, loading: () {
-              return const Center(child: CircularProgressIndicator());
-            }),
-          ),
+                            Text(attendance.time ?? '', style: tableTextStyle)),
+                  ])),
         ]));
   }
 }

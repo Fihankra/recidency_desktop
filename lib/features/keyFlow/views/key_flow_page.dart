@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:residency_desktop/config/theme/theme.dart';
+import 'package:residency_desktop/core/constants/role_enum.dart';
 import 'package:residency_desktop/core/widgets/components/page_headers.dart';
 import 'package:residency_desktop/core/widgets/custom_input.dart';
 import 'package:residency_desktop/core/widgets/table/data/models/custom_table_columns_model.dart';
 import 'package:residency_desktop/core/widgets/table/data/models/custom_table_rows_model.dart';
 import 'package:residency_desktop/core/widgets/table/widgets/custom_table.dart';
+import 'package:residency_desktop/features/auth/provider/mysefl_provider.dart';
 import 'package:residency_desktop/features/keyFlow/data/key_flow.model.dart';
 import 'package:residency_desktop/features/keyFlow/provider/key_flow_provider.dart';
 
@@ -22,6 +24,7 @@ class _KeyFlowPageState extends ConsumerState<KeyFlowPage> {
   @override
   Widget build(BuildContext context) {
     var keyLogData = ref.watch(keyLogProvider);
+    var me = ref.watch(myselfProvider);
     var keyLogNotifier = ref.read(keyLogProvider.notifier);
     var tableTextStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
         fontFamily: 'openSans', fontSize: 14, fontWeight: FontWeight.w500);
@@ -139,154 +142,155 @@ class _KeyFlowPageState extends ConsumerState<KeyFlowPage> {
                             ),
                           ),
                           const SizedBox(width: 25),
-                          PopupMenuButton(
-                            itemBuilder: (context) {
-                              return [
-                                PopupMenuItem(
-                                  value: 'pdf',
-                                  child: PopupMenuButton<int>(
-                                    itemBuilder: (context) => [
-                                      const PopupMenuItem(
-                                        value: 1,
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.all_inbox),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            Text("All Data")
-                                          ],
+                          if (me.role == Role.hallAdmin)
+                            PopupMenuButton(
+                              itemBuilder: (context) {
+                                return [
+                                  PopupMenuItem(
+                                    value: 'pdf',
+                                    child: PopupMenuButton<int>(
+                                      itemBuilder: (context) => [
+                                        const PopupMenuItem(
+                                          value: 1,
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.all_inbox),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              Text("All Data")
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      // popupmenu item 2
-                                      const PopupMenuItem(
-                                        value: 2,
-                                        // row has two child icon and text
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.table_rows),
-                                            SizedBox(
-                                              // sized box with width 10
-                                              width: 10,
-                                            ),
-                                            Text("Table Content")
-                                          ],
+                                        // popupmenu item 2
+                                        const PopupMenuItem(
+                                          value: 2,
+                                          // row has two child icon and text
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.table_rows),
+                                              SizedBox(
+                                                // sized box with width 10
+                                                width: 10,
+                                              ),
+                                              Text("Table Content")
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                    elevation: 2,
-                                    child: const Row(
-                                      children: [
-                                        Icon(FontAwesomeIcons.filePdf),
-                                        SizedBox(width: 5),
-                                        Text('Export as PDF'),
                                       ],
+                                      elevation: 2,
+                                      child: const Row(
+                                        children: [
+                                          Icon(FontAwesomeIcons.filePdf),
+                                          SizedBox(width: 5),
+                                          Text('Export as PDF'),
+                                        ],
+                                      ),
+                                      onSelected: (value) {
+                                        if (value == 1) {
+                                          keyLogNotifier.exportKeyLogs(
+                                            dataLength: 'all',
+                                            format: 'pdf',
+                                          );
+                                        } else {
+                                          keyLogNotifier.exportKeyLogs(
+                                            dataLength: 'table',
+                                            format: 'pdf',
+                                          );
+                                        }
+                                      },
                                     ),
-                                    onSelected: (value) {
-                                      if (value == 1) {
-                                        keyLogNotifier.exportKeyLogs(
-                                          dataLength: 'all',
-                                          format: 'pdf',
-                                        );
-                                      } else {
-                                        keyLogNotifier.exportKeyLogs(
-                                          dataLength: 'table',
-                                          format: 'pdf',
-                                        );
-                                      }
-                                    },
                                   ),
-                                ),
-                                const PopupMenuItem(
-                                  height: 2,
-                                  enabled: false,
-                                  child: Divider(
-                                    color: primaryColor,
-                                    thickness: 2,
+                                  const PopupMenuItem(
+                                    height: 2,
+                                    enabled: false,
+                                    child: Divider(
+                                      color: primaryColor,
+                                      thickness: 2,
+                                    ),
                                   ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'excel',
-                                  child: PopupMenuButton<int>(
-                                    itemBuilder: (context) => [
-                                      const PopupMenuItem(
-                                        value: 1,
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.all_inbox),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            Text("All Data")
-                                          ],
+                                  PopupMenuItem(
+                                    value: 'excel',
+                                    child: PopupMenuButton<int>(
+                                      itemBuilder: (context) => [
+                                        const PopupMenuItem(
+                                          value: 1,
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.all_inbox),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              Text("All Data")
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      // popupmenu item 2
-                                      const PopupMenuItem(
-                                        value: 2,
-                                        // row has two child icon and text
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.table_rows),
-                                            SizedBox(
-                                              // sized box with width 10
-                                              width: 10,
-                                            ),
-                                            Text("Table Content")
-                                          ],
+                                        // popupmenu item 2
+                                        const PopupMenuItem(
+                                          value: 2,
+                                          // row has two child icon and text
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.table_rows),
+                                              SizedBox(
+                                                // sized box with width 10
+                                                width: 10,
+                                              ),
+                                              Text("Table Content")
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                    elevation: 2,
-                                    child: const Row(
-                                      children: [
-                                        Icon(FontAwesomeIcons.fileExcel),
-                                        SizedBox(width: 5),
-                                        Text('Export as Excel'),
                                       ],
+                                      elevation: 2,
+                                      child: const Row(
+                                        children: [
+                                          Icon(FontAwesomeIcons.fileExcel),
+                                          SizedBox(width: 5),
+                                          Text('Export as Excel'),
+                                        ],
+                                      ),
+                                      onSelected: (value) {
+                                        if (value == 1) {
+                                          keyLogNotifier.exportKeyLogs(
+                                            dataLength: 'all',
+                                            format: 'xlsx',
+                                          );
+                                        } else {
+                                          keyLogNotifier.exportKeyLogs(
+                                            dataLength: 'table',
+                                            format: 'xlsx',
+                                          );
+                                        }
+                                      },
                                     ),
-                                    onSelected: (value) {
-                                      if (value == 1) {
-                                        keyLogNotifier.exportKeyLogs(
-                                          dataLength: 'all',
-                                          format: 'xlsx',
-                                        );
-                                      } else {
-                                        keyLogNotifier.exportKeyLogs(
-                                          dataLength: 'table',
-                                          format: 'xlsx',
-                                        );
-                                      }
-                                    },
                                   ),
+                                ];
+                              },
+                              onSelected: (value) {},
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 25),
+                                decoration: BoxDecoration(
+                                  color: secondaryColor,
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(color: primaryColor),
                                 ),
-                              ];
-                            },
-                            onSelected: (value) {},
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 25),
-                              decoration: BoxDecoration(
-                                color: secondaryColor,
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(color: primaryColor),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    MdiIcons.export,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 5),
-                                  const Text(
-                                    'Export',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      MdiIcons.export,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    const Text(
+                                      'Export',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
                         ]),
                   ),
                   currentIndex: keyLogData.currentPageItems.isNotEmpty
@@ -361,7 +365,9 @@ class _KeyFlowPageState extends ConsumerState<KeyFlowPage> {
                                 ),
                                 const SizedBox(width: 5),
                                 Text(
-                                  item.activity ?? '',
+                                  item.activity!.toLowerCase().contains('in')
+                                      ? 'Returning'
+                                      : 'Collecting',
                                   style: TextStyle(
                                     color: item.activity!
                                             .toLowerCase()

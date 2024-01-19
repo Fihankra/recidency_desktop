@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:open_app_file/open_app_file.dart';
@@ -13,10 +14,8 @@ import 'package:residency_desktop/features/settings/provider/settings_provider.d
 import 'package:residency_desktop/features/students/data/students_model.dart';
 import 'package:residency_desktop/utils/application_utils.dart';
 
-
-
-final keyLogProvider = StateNotifierProvider
-    .autoDispose<KeyLogNotifier, TableModel<KeyLogModel>>(
+final keyLogProvider =
+    StateNotifierProvider.autoDispose<KeyLogNotifier, TableModel<KeyLogModel>>(
         (ref) {
   return KeyLogNotifier(ref.watch(keyLogDataProvider));
 });
@@ -188,7 +187,7 @@ class KeyLogNotifier extends StateNotifier<TableModel<KeyLogModel>> {
 
   void exportKeyLogs(
       {required String dataLength, required String format}) async {
-         if (state.items.isEmpty) {
+    if (state.items.isEmpty) {
       CustomDialog.showError(message: 'No data to export');
       return;
     }
@@ -236,7 +235,8 @@ class NewKeyFlow extends StateNotifier<void> {
   void addKeyActivity(
       {required WidgetRef ref,
       required String activity,
-      required StudentModel student}) async {
+      required StudentModel student,
+      TextEditingController? controller}) async {
     CustomDialog.showLoading(message: 'Adding Key Activity....');
     var dio = ref.watch(serverProvider);
     var settings = ref.watch(settingsProvider);
@@ -257,19 +257,20 @@ class NewKeyFlow extends StateNotifier<void> {
     keyLog.studentImage = student.image;
     keyLog.assistantImage = me.image;
     keyLog.id = AppUtils.getId();
-    var (status,data, message) = await KeyFlowUseCase(dio: dio!).addKeyFlow(keyLog);
+    var (status, data, message) =
+        await KeyFlowUseCase(dio: dio!).addKeyFlow(keyLog);
     CustomDialog.dismiss();
     if (status) {
-      if(data!=null){
+      if (data != null) {
         ref.read(keyLogDataProvider.notifier).addLog(data);
+        if (controller != null) controller.clear();
         CustomDialog.showToast(
             message: message ?? 'Activity added successfully');
-      }else{
-        CustomDialog.showError(message: message??'Failed to add activity');
+      } else {
+        CustomDialog.showError(message: message ?? 'Failed to add activity');
       }
-      
     } else {
-      CustomDialog.showError(message: message??'Failed to add activity');
+      CustomDialog.showError(message: message ?? 'Failed to add activity');
     }
   }
 }

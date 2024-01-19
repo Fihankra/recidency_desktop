@@ -11,7 +11,6 @@ import 'package:residency_desktop/core/widgets/custom_input.dart';
 import 'package:residency_desktop/features/complaints/provider/complaints_provider.dart';
 import 'package:residency_desktop/features/container/provider/main_provider.dart';
 import 'package:residency_desktop/features/students/data/students_model.dart';
-import 'package:residency_desktop/features/students/provider/student_provider.dart';
 
 import '../../../core/widgets/custom_dialog.dart';
 
