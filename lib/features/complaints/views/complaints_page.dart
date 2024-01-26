@@ -270,6 +270,8 @@ class _ComplaintsPageState extends ConsumerState<ComplaintsPage> {
                     title: 'Description',
                     cellBuilder: (complaint) {
                       return Text(complaint.description ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: tableTextStyle);
                     },
                   ),

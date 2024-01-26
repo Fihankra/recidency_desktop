@@ -12,7 +12,6 @@ import 'package:residency_desktop/core/widgets/table/widgets/custom_table.dart';
 import 'package:residency_desktop/features/dashboard/data/attendance_model.dart';
 import 'package:residency_desktop/features/dashboard/provider/attendance_provider.dart';
 import 'package:residency_desktop/features/dashboard/views/components/dashboard_card.dart';
-
 import '../../container/provider/main_provider.dart';
 
 class AdminDashboard extends ConsumerStatefulWidget {

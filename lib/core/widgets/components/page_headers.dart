@@ -172,6 +172,7 @@ class PageHeaders extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 10),
                                 CustomButton(
+                                  color: Colors.blue,
                                   text: secondExtraButtonText ?? "",
                                   icon: FontAwesomeIcons.plus,
                                   radius: 5,

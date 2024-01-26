@@ -314,10 +314,8 @@ class StaffNotifier extends StateNotifier<TableModel<StaffModel>> {
           .where((element) =>
               element.firstname!.toLowerCase().contains(query.toLowerCase()) ||
               element.surname!.toLowerCase().contains(query.toLowerCase()) ||
-              element.email!.toLowerCase().contains(query.toLowerCase()) ||
               element.id!.toLowerCase().contains(query.toLowerCase()) ||
-              element.role!.toLowerCase().contains(query.toLowerCase()) ||
-              element.phone!.toLowerCase().contains(query.toLowerCase()))
+              element.role!.toLowerCase().contains(query.toLowerCase()))
           .toList();
       List<List<StaffModel>> pages = [];
       state = state.copyWith(

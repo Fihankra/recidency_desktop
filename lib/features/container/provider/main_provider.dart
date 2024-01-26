@@ -26,7 +26,7 @@ final mainProvider = FutureProvider<void>((ref) async {
   // }
   var staffs = await StaffUsecase(dio: dio!).getStaffs();
   //remove the current user from the list
-  staffs.removeWhere((element) => element.id == me.id);
+  staffs.removeWhere((element) => element.id!.toLowerCase() == me.id!.toLowerCase());
   staffs.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
   ref.read(staffDataProvider.notifier).setStaffs(staffs);
   //!===========================================================================
@@ -48,7 +48,8 @@ final mainProvider = FutureProvider<void>((ref) async {
   complaints.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
   ref.read(complaintDataProvider.notifier).setComplaints(complaints);
   //? get all massages
-  var messages = await MessageUsecase(dio: dio).getMessages(settings.academicYear!);
+  var messages =
+      await MessageUsecase(dio: dio).getMessages(settings.academicYear!);
   messages.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
   ref.read(messageDataProvider.notifier).setMessages(messages);
   //? get all keyLogs
@@ -62,7 +63,6 @@ final mainProvider = FutureProvider<void>((ref) async {
   attendance.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
   ref.read(attendanceDataProvider.notifier).setAttendance(attendance);
 });
-
 
 final attendanceDataProvider =
     StateNotifierProvider<AttendanceProvider, List<AttendanceModel>>(
@@ -78,7 +78,9 @@ final studentDataProvider =
 final complaintDataProvider =
     StateNotifierProvider<ComplaintsProvider, List<ComplaintsModel>>(
         (ref) => ComplaintsProvider());
-final messageDataProvider= StateNotifierProvider<MessageProvider,List<MessageModel>>((ref) => MessageProvider());
+final messageDataProvider =
+    StateNotifierProvider<MessageProvider, List<MessageModel>>(
+        (ref) => MessageProvider());
 final keyLogDataProvider =
     StateNotifierProvider<KeyLogsProvider, List<KeyLogModel>>(
         (ref) => KeyLogsProvider());
@@ -169,28 +171,29 @@ class ComplaintsProvider extends StateNotifier<List<ComplaintsModel>> {
   }
 }
 
-
-class MessageProvider extends StateNotifier<List<MessageModel>>{
-  MessageProvider():super([]);
-  void setMessages(List<MessageModel> messages){
+class MessageProvider extends StateNotifier<List<MessageModel>> {
+  MessageProvider() : super([]);
+  void setMessages(List<MessageModel> messages) {
     state = messages;
   }
-  void addMessage(MessageModel message){
-    state = [...state,message];
+
+  void addMessage(MessageModel message) {
+    state = [...state, message];
   }
-  void updateMessage(MessageModel message){
+
+  void updateMessage(MessageModel message) {
     state = [
-      for(var item in state)
-      if(item.id == message.id) message else item
-    ];
-  }
-  void deleteMessage(String id){
-    state = [
-      for(var item in state)
-      if(item.id != id) item
+      for (var item in state)
+        if (item.id == message.id) message else item
     ];
   }
 
+  void deleteMessage(String id) {
+    state = [
+      for (var item in state)
+        if (item.id != id) item
+    ];
+  }
 }
 
 class AttendanceProvider extends StateNotifier<List<AttendanceModel>> {
@@ -202,6 +205,4 @@ class AttendanceProvider extends StateNotifier<List<AttendanceModel>> {
   void addAttendance(AttendanceModel attendance) {
     state = [...state, attendance];
   }
-
-
 }

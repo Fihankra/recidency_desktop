@@ -28,7 +28,7 @@ class AuthProvider extends StateNotifier<AuthModel> {
   ) : super(AuthModel());
   final Dio? dio;
   void setId(String? id) {
-    state = state.copyWith(id: () => id);
+    state = state.copyWith(id: () => id!.toUpperCase());
   }
 
   void setPassword(String? password) {

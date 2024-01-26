@@ -113,15 +113,10 @@ class StudentNotifier extends StateNotifier<TableModel<StudentModel>> {
             return element.firstname!
                     .toLowerCase()
                     .contains(query.toLowerCase()) ||
-                element.surname!.toLowerCase().contains(query.toLowerCase()) ||
-                element.department!
-                    .toLowerCase()
-                    .contains(query.toLowerCase()) ||
+                element.surname!.toLowerCase().contains(query.toLowerCase()) ||        
                 element.block!.toLowerCase().contains(query.toLowerCase()) ||
                 element.room!.toLowerCase().contains(query.toLowerCase()) ||
-                element.level!.toLowerCase().contains(query.toLowerCase()) ||
-                element.id!.toLowerCase().contains(query.toLowerCase()) ||
-                element.phone!.toLowerCase().contains(query.toLowerCase());
+                element.id!.toLowerCase().contains(query.toLowerCase());
           }).toList()
         : items;
 

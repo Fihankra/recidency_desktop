@@ -9,6 +9,7 @@ import 'package:residency_desktop/features/settings/data/settings_model.dart';
 import 'package:residency_desktop/features/settings/usecase/settings_usecase.dart';
 import 'package:residency_desktop/utils/application_utils.dart';
 
+
 final settingsFutureProvider = FutureProvider<SettingsModel>((ref) async {
   var dio = ref.watch(serverProvider);
   var data = await SettingsUseCase(dio: dio!).loadSettings() ?? SettingsModel();
@@ -104,7 +105,8 @@ class SettingsNotifier extends StateNotifier<SettingsModel> {
       );
     } else {
       if (settings != null) {
-        ref.invalidate(settingsFutureProvider);
+       // ref.invalidate(settingsFutureProvider);
+        //ref.invalidate(mainProvider);
         CustomDialog.dismiss();
         CustomDialog.showToast(
           message: 'Settings Saved Successfully',

@@ -44,6 +44,9 @@ class _StudentListState extends ConsumerState<StudentList> {
           subTitle: 'List of all Residential Students',
           hasBackButton: false,
           extraButtonText: 'New Student',
+          hasSecondExtraButton: true,
+          secondExtraButtonText: 'Import from Excel',
+          onSecondExtraButtonPressed: () {},
           hasExtraButton: true,
           onExtraButtonPressed: () {
             context.go(RouterInfo.newStudentRoute.path);

@@ -76,11 +76,15 @@ class _HomePageState extends ConsumerState<HomePage> {
                                         width: 80,
                                         height: 80,
                                         decoration: BoxDecoration(
-                                            image: DecorationImage(
-                                                image: FileImage(File(keyFlow
-                                                    .lastKeyLog!
-                                                    .studentImage!)),
-                                                fit: BoxFit.cover),
+                                            image: keyFlow.lastKeyLog!
+                                                        .studentImage !=
+                                                    null
+                                                ? DecorationImage(
+                                                    image: FileImage(File(
+                                                        keyFlow.lastKeyLog!
+                                                            .studentImage!)),
+                                                    fit: BoxFit.cover)
+                                                : null,
                                             borderRadius:
                                                 BorderRadius.circular(10)),
                                       ),
